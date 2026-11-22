@@ -2,6 +2,7 @@
 /docpocket
 /docpocket.exe
 *.exe
+*.exe~
 *.test
 *.out
 
