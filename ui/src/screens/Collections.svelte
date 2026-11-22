@@ -1,14 +1,15 @@
 <script>
   import { onMount } from 'svelte'
   import { api } from '../lib/api.js'
+  import { SYSTEM_FIELDS } from '../lib/api-reference.js'
   import { formatDate, formatNumber, truncate } from '../lib/format.js'
   import { notify, openCollection, createCollectionRequest } from '../lib/stores.js'
+  import ApiReference from '../lib/components/ApiReference.svelte'
   import Icon from '../lib/components/Icon.svelte'
   import Modal from '../lib/components/Modal.svelte'
   import ConfirmDialog from '../lib/components/ConfirmDialog.svelte'
 
   const fieldTypes = ['string', 'number', 'bool', 'array', 'object', 'file', 'any']
-  const systemFields = new Set(['id', 'created', 'updated', 'passwordHash', 'tokenKey', 'verified'])
   const ruleOps = [
     ['list', 'Ver lista'],
     ['view', 'Ver detalle'],
@@ -114,246 +115,17 @@
 
   let pendingOpen = ''
 
-  let apiLang = $state('curl')
-  let apiProbe = $state({ loading: false, error: '', response: '' })
-
-  const apiBase = typeof window !== 'undefined' ? window.location.origin : 'http://127.0.0.1:8090'
-
   const activeTemplate = $derived(templates.find((t) => t.id === createTemplate) || templates[0])
 
   const formFields = $derived(
     (detail?.fields || [])
-      .filter((f) => !systemFields.has(f.name))
+      .filter((f) => !SYSTEM_FIELDS.has(f.name))
       .map((f) => ({ ...f, label: fieldLabel(f.name) }))
   )
 
   const visibleFields = $derived(
-    (detail?.fields || []).filter((f) => !systemFields.has(f.name))
+    (detail?.fields || []).filter((f) => !SYSTEM_FIELDS.has(f.name))
   )
-
-  const sampleBody = $derived.by(() => {
-    const body = {}
-    for (const field of formFields) {
-      switch (field.type) {
-        case 'number':
-          body[field.name] = 0
-          break
-        case 'bool':
-          body[field.name] = false
-          break
-        case 'array':
-          body[field.name] = ['uno', 'dos']
-          break
-        case 'object':
-          body[field.name] = { clave: 'valor' }
-          break
-        case 'file':
-          body[field.name] = ''
-          break
-        default:
-          body[field.name] = 'texto de ejemplo'
-      }
-    }
-    if (!Object.keys(body).length) body.mensaje = 'Hola mundo'
-    return body
-  })
-
-  const patchSample = $derived.by(() => {
-    const first = formFields[0]
-    if (!first) return { mensaje: 'nuevo valor' }
-    if (first.type === 'number') return { [first.name]: 1 }
-    if (first.type === 'bool') return { [first.name]: true }
-    if (first.type === 'array') return { [first.name]: ['uno', 'dos'] }
-    if (first.type === 'object') return { [first.name]: { clave: 'valor' } }
-    return { [first.name]: 'nuevo valor' }
-  })
-
-  const apiEndpoints = $derived.by(() => {
-    const col = encodeURIComponent(selected)
-    const base = apiBase
-    const listPath = `/api/collections/${col}/records`
-    const onePath = `${listPath}/{id}`
-    const listURL = `${base}${listPath}`
-    const oneURL = `${base}${onePath}`
-    const bodyInline = JSON.stringify(sampleBody)
-    const patchInline = JSON.stringify(patchSample)
-    const headers = `-H 'Authorization: Bearer TU_TOKEN' -H 'Content-Type: application/json'`
-    return [
-      {
-        id: 'list',
-        method: 'GET',
-        title: 'Listar documentos',
-        path: listPath,
-        desc: 'Devuelve una página de documentos. Funciona sin token solo si la regla de lista es pública.',
-        params: [
-          ['filter', 'Filtro, p. ej. titulo = "Hola"'],
-          ['sort', 'Orden: campo, -campo (máximo 3)'],
-          ['limit', 'Tamaño de página (por defecto 50, máximo 500)'],
-          ['cursor', 'Cursor de la página siguiente'],
-          ['fields', 'Proyección: id, titulo, autor'],
-          ['include', 'Referencias: autor.nombre'],
-          ['view', 'Vista guardada por nombre'],
-        ],
-        open: true,
-        examples: {
-          curl: `curl --get '${listURL}' -H 'Authorization: Bearer TU_TOKEN' --data-urlencode 'limit=25' --data-urlencode 'sort=-created'`,
-          js: `const res = await fetch('${listURL}?limit=25&sort=-created', {\n  headers: { Authorization: 'Bearer TU_TOKEN' }\n})\nconst { items, nextCursor } = await res.json()`,
-        },
-      },
-      {
-        id: 'one',
-        method: 'GET',
-        title: 'Obtener un documento',
-        path: onePath,
-        desc: 'Devuelve un documento por su ID. Requiere la regla de ver detalle.',
-        examples: {
-          curl: `curl '${oneURL}' -H 'Authorization: Bearer TU_TOKEN'`,
-          js: `const res = await fetch('${oneURL}', {\n  headers: { Authorization: 'Bearer TU_TOKEN' }\n})\nconst record = await res.json()`,
-        },
-      },
-      {
-        id: 'create',
-        method: 'POST',
-        title: 'Crear documento',
-        path: listPath,
-        desc: 'Crea un documento. El servidor genera id, created y updated.',
-        examples: {
-          curl: `curl -X POST '${listURL}' ${headers} -d '${bodyInline}'`,
-          js: `const res = await fetch('${listURL}', {\n  method: 'POST',\n  headers: { 'Content-Type': 'application/json', Authorization: 'Bearer TU_TOKEN' },\n  body: JSON.stringify(${bodyInline})\n})\nconst record = await res.json()`,
-        },
-      },
-      {
-        id: 'patch',
-        method: 'PATCH',
-        title: 'Actualizar documento',
-        path: onePath,
-        desc: 'Mezcla los campos enviados. Envía null para borrar un campo; los arrays se reemplazan.',
-        examples: {
-          curl: `curl -X PATCH '${oneURL}' ${headers} -d '${patchInline}'`,
-          js: `const res = await fetch('${oneURL}', {\n  method: 'PATCH',\n  headers: { 'Content-Type': 'application/json', Authorization: 'Bearer TU_TOKEN' },\n  body: JSON.stringify(${patchInline})\n})\nconst record = await res.json()`,
-        },
-      },
-      {
-        id: 'put',
-        method: 'PUT',
-        title: 'Reemplazar documento',
-        path: onePath,
-        desc: 'Reemplaza el documento completo conservando id y created.',
-        examples: {
-          curl: `curl -X PUT '${oneURL}' ${headers} -d '${bodyInline}'`,
-          js: `const res = await fetch('${oneURL}', {\n  method: 'PUT',\n  headers: { 'Content-Type': 'application/json', Authorization: 'Bearer TU_TOKEN' },\n  body: JSON.stringify(${bodyInline})\n})\nconst record = await res.json()`,
-        },
-      },
-      {
-        id: 'delete',
-        method: 'DELETE',
-        title: 'Eliminar documento',
-        path: onePath,
-        desc: 'Borra el documento y, tras confirmar, sus archivos subidos.',
-        examples: {
-          curl: `curl -X DELETE '${oneURL}' -H 'Authorization: Bearer TU_TOKEN'`,
-          js: `await fetch('${oneURL}', {\n  method: 'DELETE',\n  headers: { Authorization: 'Bearer TU_TOKEN' }\n})`,
-        },
-      },
-      {
-        id: 'batch',
-        method: 'POST',
-        title: 'Lote de operaciones',
-        path: '/api/batch',
-        desc: 'Hasta 100 operaciones en una sola transacción; si una falla, se revierte todo.',
-        examples: {
-          curl: `curl -X POST '${base}/api/batch' ${headers} -d '{"operations":[{"method":"POST","collection":"${selected}","record":${bodyInline}}]}'`,
-          js: `const res = await fetch('${base}/api/batch', {\n  method: 'POST',\n  headers: { 'Content-Type': 'application/json', Authorization: 'Bearer TU_TOKEN' },\n  body: JSON.stringify({\n    operations: [\n      { method: 'POST', collection: '${selected}', record: ${bodyInline} }\n    ]\n  })\n})`,
-        },
-      },
-      {
-        id: 'aggregate',
-        method: 'POST',
-        title: 'Agregaciones',
-        path: `/api/collections/${col}/aggregate`,
-        desc: 'Cuenta documentos o suma un campo numérico, con filtro opcional.',
-        examples: {
-          curl: `curl -X POST '${base}/api/collections/${col}/aggregate' ${headers} -d '{"op":"count"}'`,
-          js: `const res = await fetch('${base}/api/collections/${col}/aggregate', {\n  method: 'POST',\n  headers: { 'Content-Type': 'application/json', Authorization: 'Bearer TU_TOKEN' },\n  body: JSON.stringify({ op: 'count' })\n})\nconst { result } = await res.json()`,
-        },
-      },
-    ]
-  })
-
-  const authEndpoints = $derived.by(() => {
-    if (detail?.type !== 'auth') return []
-    const col = encodeURIComponent(selected)
-    const loginURL = `${apiBase}/api/collections/${col}/auth-with-password`
-    const registerURL = `${apiBase}/api/collections/${col}/auth-register`
-    return [
-      {
-        id: 'login',
-        group: 'auth',
-        method: 'POST',
-        title: 'Iniciar sesión (usuario)',
-        path: `/api/collections/${col}/auth-with-password`,
-        desc: 'Devuelve token, refreshToken y el registro del usuario.',
-        examples: {
-          curl: `curl -X POST '${loginURL}' -H 'Content-Type: application/json' -d '{"identity":"usuario@ejemplo.com","password":"tu-password"}'`,
-          js: `const res = await fetch('${loginURL}', {\n  method: 'POST',\n  headers: { 'Content-Type': 'application/json' },\n  body: JSON.stringify({ identity: 'usuario@ejemplo.com', password: 'tu-password' })\n})\nconst { token, record } = await res.json()`,
-        },
-      },
-      {
-        id: 'register',
-        group: 'auth',
-        method: 'POST',
-        title: 'Registrar usuario',
-        path: `/api/collections/${col}/auth-register`,
-        desc: 'Crea una cuenta nueva en esta colección de usuarios.',
-        examples: {
-          curl: `curl -X POST '${registerURL}' -H 'Content-Type: application/json' -d '{"email":"nuevo@ejemplo.com","password":"una-password-larga"}'`,
-          js: `const res = await fetch('${registerURL}', {\n  method: 'POST',\n  headers: { 'Content-Type': 'application/json' },\n  body: JSON.stringify({ email: 'nuevo@ejemplo.com', password: 'una-password-larga' })\n})\nconst { token, record } = await res.json()`,
-        },
-      },
-    ]
-  })
-
-  const allEndpoints = $derived([...apiEndpoints, ...authEndpoints])
-
-  const apiStructure = $derived.by(() => {
-    const rows = [
-      { name: 'id', type: 'string (ULID)', required: false, note: 'Generado por el servidor' },
-      { name: 'created', type: 'string (ISO 8601)', required: false, note: 'Generado por el servidor' },
-      { name: 'updated', type: 'string (ISO 8601)', required: false, note: 'Generado por el servidor' },
-    ]
-    for (const field of formFields) {
-      rows.push({
-        name: field.name,
-        type: field.type,
-        required: Boolean(field.required),
-        note: field.maxLen ? `máx. ${field.maxLen}` : '',
-      })
-    }
-    if (detail?.type === 'auth') {
-      const names = new Set(rows.map((row) => row.name))
-      if (!names.has('email')) {
-        rows.push({ name: 'email', type: 'string', required: false, note: 'Cuenta de la colección' })
-      }
-      if (!names.has('verified')) {
-        rows.push({ name: 'verified', type: 'bool', required: false, note: 'Solo lectura' })
-      }
-    }
-    return rows
-  })
-
-  const sampleResponse = $derived.by(() => {
-    const body = {
-      id: '01J8Z9XK2M4N6P8Q0R2S4T6V8',
-      created: '2026-01-01T12:00:00.000Z',
-      updated: '2026-01-01T12:00:00.000Z',
-      ...sampleBody,
-    }
-    if (detail?.type === 'auth') {
-      body.email = 'usuario@ejemplo.com'
-      body.verified = false
-    }
-    return body
-  })
 
   function fieldLabel(name) {
     return String(name || '')
@@ -403,33 +175,7 @@
   function selectCollection(name) {
     selected = name
     resetPagination()
-    apiProbe = { loading: false, error: '', response: '' }
     return loadSelected()
-  }
-
-  async function copyText(text) {
-    try {
-      await navigator.clipboard.writeText(String(text))
-      notify('Copiado al portapapeles.', 'success')
-    } catch {
-      notify('No se pudo copiar al portapapeles.', 'error')
-    }
-  }
-
-  async function probeApi() {
-    apiProbe = { loading: true, error: '', response: '' }
-    try {
-      const data = await api(`/api/collections/${encodeURIComponent(selected)}/records`, {
-        params: { limit: 5 },
-      })
-      apiProbe = { loading: false, error: '', response: JSON.stringify(data, null, 2) }
-    } catch (error) {
-      apiProbe = {
-        loading: false,
-        error: error instanceof Error ? error.message : String(error),
-        response: '',
-      }
-    }
   }
 
   async function loadCollections() {
@@ -475,7 +221,7 @@
   }
 
   function resetDrafts() {
-    fieldDraft = (detail?.fields || []).filter((f) => !systemFields.has(f.name)).map((f) => ({ ...f }))
+    fieldDraft = (detail?.fields || []).filter((f) => !SYSTEM_FIELDS.has(f.name)).map((f) => ({ ...f }))
     indexDraft = (detail?.indexes || []).map((i) => ({ ...i }))
     cascadeDraft = (detail?.cascade || []).map((c) => ({ ...c }))
     const access = {}
@@ -1013,123 +759,15 @@
             </div>
 
           {:else if tab === 'api'}
-            <div class="stack api-tab">
-              <div class="api-hero">
-                <div>
-                  <h3>API REST de <code>{detail.name}</code></h3>
-                  <p class="muted tiny">Cualquier app (web, móvil o script) puede leer y escribir esta colección por HTTP. El panel usa esta misma API.</p>
-                </div>
-                <div class="row api-base-row">
-                  <code class="api-base-url">{apiBase}</code>
-                  <button type="button" class="btn btn-sm" onclick={() => copyText(apiBase)}>Copiar</button>
-                </div>
-              </div>
-
-              <div class="callout callout-info">
-                <span>
-                  Autenticación: envía <code>Authorization: Bearer &lt;token&gt;</code>.
-                  {#if detail.type === 'auth'}
-                    Inicia sesión como usuario con <code>POST /api/collections/{detail.name}/auth-with-password</code>.
-                  {:else}
-                    Obtén un token de superusuario con <code>POST /api/admin/auth-with-password</code>.
-                  {/if}
-                </span>
-              </div>
-
-              <details class="adv-box api-endpoint" open>
-                <summary>
-                  <Icon name="code" size={14} />
-                  Estructura del documento
-                  <span class="spacer"></span>
-                  <span class="muted tiny">{apiStructure.length} campos</span>
-                </summary>
-                <div class="stack mt-2">
-                  <p class="muted tiny">Campos que acepta la colección. Los del sistema (<code>id</code>, <code>created</code>, <code>updated</code>) los genera el servidor.</p>
-                  {#if !formFields.length && detail.type !== 'auth'}
-                    <div class="callout callout-info">
-                      <span>Esta colección no define campos, así que acepta documentos JSON libres. Puedes añadirlos en la pestaña <strong>Campos</strong>.</span>
-                    </div>
-                  {/if}
-                  <div class="table-wrap">
-                    <table class="api-params">
-                      <thead><tr><th>Campo</th><th>Tipo</th><th>Obligatorio</th><th>Notas</th></tr></thead>
-                      <tbody>
-                        {#each apiStructure as row (row.name)}
-                          <tr>
-                            <td><code>{row.name}</code></td>
-                            <td class="muted">{row.type}</td>
-                            <td>{row.required ? 'Sí' : '—'}</td>
-                            <td class="muted">{row.note || '—'}</td>
-                          </tr>
-                        {/each}
-                      </tbody>
-                    </table>
-                  </div>
-                  <div class="row">
-                    <button type="button" class="btn btn-xs" onclick={() => copyText(JSON.stringify(sampleResponse, null, 2))}>Copiar JSON de ejemplo</button>
-                  </div>
-                  <pre class="code-block">{JSON.stringify(sampleResponse, null, 2)}</pre>
-                </div>
-              </details>
-
-              <div class="row">
-                <div class="segmented" role="group" aria-label="Lenguaje de ejemplo">
-                  <button type="button" class="btn btn-xs" class:btn-primary={apiLang === 'curl'} onclick={() => (apiLang = 'curl')}>cURL</button>
-                  <button type="button" class="btn btn-xs" class:btn-primary={apiLang === 'js'} onclick={() => (apiLang = 'js')}>JavaScript</button>
-                </div>
-                <span class="spacer"></span>
-                <span class="muted tiny">Ejemplos listos para copiar</span>
-              </div>
-
-              {#each allEndpoints as endpoint, index (endpoint.id)}
-                {#if endpoint.group === 'auth' && (index === 0 || allEndpoints[index - 1].group !== 'auth')}
-                  <h3 class="mt-2">Inicio de sesión de usuarios</h3>
-                {/if}
-                <details class="adv-box api-endpoint" open={endpoint.open}>
-                  <summary>
-                    <span class="method method-{endpoint.method.toLowerCase()}">{endpoint.method}</span>
-                    <code>{endpoint.path}</code>
-                    <span class="spacer"></span>
-                    <span class="muted tiny">{endpoint.title}</span>
-                  </summary>
-                  <div class="stack mt-2">
-                    <p class="muted tiny">{endpoint.desc}</p>
-                    {#if endpoint.params}
-                      <div class="table-wrap">
-                        <table class="api-params">
-                          <thead><tr><th>Parámetro</th><th>Uso</th></tr></thead>
-                          <tbody>
-                            {#each endpoint.params as [name, help] (name)}
-                              <tr><td><code>{name}</code></td><td class="muted">{help}</td></tr>
-                            {/each}
-                          </tbody>
-                        </table>
-                      </div>
-                    {/if}
-                    <div class="row">
-                      <button type="button" class="btn btn-xs" onclick={() => copyText(endpoint.examples[apiLang])}>Copiar ejemplo</button>
-                      {#if endpoint.id === 'list'}
-                        <button type="button" class="btn btn-xs btn-success-outline" onclick={probeApi} disabled={apiProbe.loading}>
-                          {#if apiProbe.loading}<span class="spinner" aria-hidden="true"></span>{/if}
-                          Probar ahora
-                        </button>
-                      {/if}
-                    </div>
-                    <pre class="code-block">{endpoint.examples[apiLang]}</pre>
-                    {#if endpoint.id === 'list' && apiProbe.error}
-                      <div class="callout callout-danger">{apiProbe.error}</div>
-                    {/if}
-                    {#if endpoint.id === 'list' && apiProbe.response}
-                      <div class="stack">
-                        <p class="muted tiny">Respuesta real (limit=5):</p>
-                        <pre class="code-block api-response">{apiProbe.response}</pre>
-                      </div>
-                    {/if}
-                  </div>
-                </details>
-              {/each}
-            </div>
-
+            <ApiReference
+              collection={detail.name}
+              type={detail.type}
+              fields={detail.fields || []}
+              onProbe={() =>
+                api(`/api/collections/${encodeURIComponent(detail.name)}/records`, {
+                  params: { limit: 5 },
+                })}
+            />
           {:else if tab === 'advanced'}
             <div class="stack">
               <details class="adv-box" open>
@@ -1360,53 +998,6 @@
   .access-row { align-items: center; }
   .access-label { width: 96px; flex: 0 0 96px; font-size: 13px; color: var(--text-muted); }
   .access-row .select { max-width: 190px; }
-  .api-tab { gap: 12px; }
-  .api-hero { display: flex; flex-direction: column; gap: 10px; }
-  .api-hero h3 { font-size: 15px; }
-  .api-base-row { flex-wrap: wrap; }
-  .api-base-url {
-    font-family: var(--mono);
-    font-size: 12.5px;
-    padding: 6px 10px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    background: var(--bg-subtle);
-    word-break: break-all;
-  }
-  .segmented { display: inline-flex; gap: 4px; }
-  .api-endpoint summary { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .api-endpoint summary code { font-size: 12px; word-break: break-all; }
-  .method {
-    display: inline-block;
-    min-width: 54px;
-    text-align: center;
-    font-family: var(--mono);
-    font-size: 10.5px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    padding: 2px 6px;
-    border-radius: 6px;
-  }
-  .method-get { color: #2563eb; background: rgba(37, 99, 235, 0.12); }
-  .method-post { color: #15803d; background: rgba(21, 128, 61, 0.12); }
-  .method-patch { color: #b45309; background: rgba(180, 83, 9, 0.12); }
-  .method-put { color: #7c3aed; background: rgba(124, 58, 237, 0.12); }
-  .method-delete { color: #b91c1c; background: rgba(185, 28, 28, 0.12); }
-  .code-block {
-    margin: 0;
-    padding: 12px 14px;
-    overflow-x: auto;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    background: var(--bg-subtle);
-    color: var(--text);
-    font-family: var(--mono);
-    font-size: 12px;
-    line-height: 1.55;
-    white-space: pre;
-  }
-  .api-response { max-height: 320px; overflow: auto; }
-  .api-params th, .api-params td { font-size: 12px; padding: 4px 8px; }
   @media (max-width: 640px) {
     .template-grid { grid-template-columns: minmax(0, 1fr); }
     .field-row, .access-row { flex-direction: column; align-items: stretch; }
