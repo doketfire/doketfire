@@ -315,6 +315,46 @@
 
   const allEndpoints = $derived([...apiEndpoints, ...authEndpoints])
 
+  const apiStructure = $derived.by(() => {
+    const rows = [
+      { name: 'id', type: 'string (ULID)', required: false, note: 'Generado por el servidor' },
+      { name: 'created', type: 'string (ISO 8601)', required: false, note: 'Generado por el servidor' },
+      { name: 'updated', type: 'string (ISO 8601)', required: false, note: 'Generado por el servidor' },
+    ]
+    for (const field of formFields) {
+      rows.push({
+        name: field.name,
+        type: field.type,
+        required: Boolean(field.required),
+        note: field.maxLen ? `máx. ${field.maxLen}` : '',
+      })
+    }
+    if (detail?.type === 'auth') {
+      const names = new Set(rows.map((row) => row.name))
+      if (!names.has('email')) {
+        rows.push({ name: 'email', type: 'string', required: false, note: 'Cuenta de la colección' })
+      }
+      if (!names.has('verified')) {
+        rows.push({ name: 'verified', type: 'bool', required: false, note: 'Solo lectura' })
+      }
+    }
+    return rows
+  })
+
+  const sampleResponse = $derived.by(() => {
+    const body = {
+      id: '01J8Z9XK2M4N6P8Q0R2S4T6V8',
+      created: '2026-01-01T12:00:00.000Z',
+      updated: '2026-01-01T12:00:00.000Z',
+      ...sampleBody,
+    }
+    if (detail?.type === 'auth') {
+      body.email = 'usuario@ejemplo.com'
+      body.verified = false
+    }
+    return body
+  })
+
   function fieldLabel(name) {
     return String(name || '')
       .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
@@ -995,6 +1035,42 @@
                   {/if}
                 </span>
               </div>
+
+              <details class="adv-box api-endpoint" open>
+                <summary>
+                  <Icon name="code" size={14} />
+                  Estructura del documento
+                  <span class="spacer"></span>
+                  <span class="muted tiny">{apiStructure.length} campos</span>
+                </summary>
+                <div class="stack mt-2">
+                  <p class="muted tiny">Campos que acepta la colección. Los del sistema (<code>id</code>, <code>created</code>, <code>updated</code>) los genera el servidor.</p>
+                  {#if !formFields.length && detail.type !== 'auth'}
+                    <div class="callout callout-info">
+                      <span>Esta colección no define campos, así que acepta documentos JSON libres. Puedes añadirlos en la pestaña <strong>Campos</strong>.</span>
+                    </div>
+                  {/if}
+                  <div class="table-wrap">
+                    <table class="api-params">
+                      <thead><tr><th>Campo</th><th>Tipo</th><th>Obligatorio</th><th>Notas</th></tr></thead>
+                      <tbody>
+                        {#each apiStructure as row (row.name)}
+                          <tr>
+                            <td><code>{row.name}</code></td>
+                            <td class="muted">{row.type}</td>
+                            <td>{row.required ? 'Sí' : '—'}</td>
+                            <td class="muted">{row.note || '—'}</td>
+                          </tr>
+                        {/each}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="row">
+                    <button type="button" class="btn btn-xs" onclick={() => copyText(JSON.stringify(sampleResponse, null, 2))}>Copiar JSON de ejemplo</button>
+                  </div>
+                  <pre class="code-block">{JSON.stringify(sampleResponse, null, 2)}</pre>
+                </div>
+              </details>
 
               <div class="row">
                 <div class="segmented" role="group" aria-label="Lenguaje de ejemplo">
