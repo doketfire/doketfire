@@ -7,6 +7,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"slices"
 	"testing"
 	"time"
 
@@ -287,6 +288,49 @@ func TestScanPagination(t *testing.T) {
 	}
 	if len(secondPage) != 4 {
 		t.Fatalf("second page = %v", secondPage)
+	}
+}
+
+func TestScanPaginationReverse(t *testing.T) {
+	s := openTestStore(t, Options{})
+	createPosts(t, s)
+	for i := 0; i < 10; i++ {
+		put(t, s, Doc{"title": "t" + itoa(i), "views": json.Number(itoa(i))})
+	}
+
+	var firstPage []string
+	var lastKey []byte
+	if err := s.View(func(tx ReadTx) error {
+		it := tx.ScanIndex("posts", "views_idx", KeyRange{}, ScanOpts{Reverse: true, Limit: 4})
+		defer it.Close()
+		for it.Next() {
+			firstPage = append(firstPage, it.Doc().GetString("title"))
+			lastKey = append([]byte(nil), it.Key()...)
+		}
+		return it.Err()
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	var secondPage []string
+	if err := s.View(func(tx ReadTx) error {
+		it := tx.ScanIndex("posts", "views_idx", KeyRange{}, ScanOpts{Reverse: true, After: lastKey, Limit: 4})
+		defer it.Close()
+		for it.Next() {
+			secondPage = append(secondPage, it.Doc().GetString("title"))
+		}
+		return it.Err()
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	wantFirst := []string{"t9", "t8", "t7", "t6"}
+	wantSecond := []string{"t5", "t4", "t3", "t2"}
+	if !slices.Equal(firstPage, wantFirst) {
+		t.Fatalf("first reverse page = %v, want %v", firstPage, wantFirst)
+	}
+	if !slices.Equal(secondPage, wantSecond) {
+		t.Fatalf("second reverse page = %v, want %v", secondPage, wantSecond)
 	}
 }
 
