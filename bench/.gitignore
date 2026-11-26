@@ -1,0 +1,6 @@
+*.db
+*.db-wal
+*.db-shm
+*.exe
+RESULTS.local.md
+RESULTS.local.json

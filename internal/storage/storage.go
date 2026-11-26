@@ -10,7 +10,7 @@ import (
 	"io"
 	"time"
 
-	"github.com/docpocket/docpocket/internal/collections"
+	"github.com/doketfire/doketfire/internal/collections"
 )
 
 // Doc is an alias for a stored JSON document.

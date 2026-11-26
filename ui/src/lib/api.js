@@ -46,7 +46,7 @@ export function __resetApiState() {
 /** Construye una URL relativa con parámetros, respetando los ya presentes. */
 export function buildURL(path, params = {}) {
   const absolute = /^[a-z][a-z\d+.-]*:\/\//i.test(path)
-  const url = new URL(path, absolute ? undefined : 'http://docpocket.local')
+  const url = new URL(path, absolute ? undefined : 'http://doketfire.local')
   for (const [key, value] of Object.entries(params || {})) {
     if (value === undefined || value === null || value === '') continue
     if (Array.isArray(value)) {

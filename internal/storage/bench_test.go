@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/docpocket/docpocket/internal/collections"
+	"github.com/doketfire/doketfire/internal/collections"
 )
 
 func benchStore(b *testing.B, n int) *BoltStore {

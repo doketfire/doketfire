@@ -1,5 +1,5 @@
 // Package app wires the storage, auth, rules, query, realtime, file and HTTP
-// layers into a runnable DocPocket instance.
+// layers into a runnable Doketfire instance.
 package app
 
 import (
@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/docpocket/docpocket/internal/api"
-	"github.com/docpocket/docpocket/internal/query"
+	"github.com/doketfire/doketfire/internal/api"
+	"github.com/doketfire/doketfire/internal/query"
 )
 
 // Config is the complete runtime configuration.
@@ -45,7 +45,7 @@ type Config struct {
 // DefaultConfig returns production-friendly defaults.
 func DefaultConfig() Config {
 	return Config{
-		Dir:            "./dp_data",
+		Dir:            "./data",
 		HTTPAddr:       "0.0.0.0:8090",
 		HTTPSAddr:      ":443",
 		MaxBodyBytes:   2 << 20,

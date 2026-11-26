@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/docpocket/docpocket/internal/auth"
+	"github.com/doketfire/doketfire/internal/auth"
 )
 
 type statusRecorder struct {

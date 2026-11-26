@@ -1,0 +1,168 @@
+{
+  "environment": {
+    "generated_at": "2026-11-26T03:16:44Z",
+    "go_version": "go1.27.3",
+    "goos": "windows",
+    "goarch": "amd64",
+    "num_cpu": 8,
+    "cpu_model": "Intel(R) Core(TM) 3 N355",
+    "total_ram_bytes": 16837042176
+  },
+  "config": {
+    "records": 100000,
+    "seed": 42,
+    "batch": 1000,
+    "point_reads": 2000,
+    "lists": 500,
+    "counts": 50,
+    "updates": 500,
+    "warmup": 50
+  },
+  "results": [
+    {
+      "engine": "bbolt",
+      "records": 100000,
+      "open_ms": 5.4235,
+      "seed_ms": 4272.7215,
+      "seed_rows_per_sec": 23404.28693983448,
+      "workloads": [
+        {
+          "name": "point_get",
+          "n": 2000,
+          "p50_ms": 0.0119,
+          "p95_ms": 0.0616,
+          "p99_ms": 0.1343,
+          "mean_ms": 0.01954,
+          "ops_per_sec": 51177.072671443195
+        },
+        {
+          "name": "list_published",
+          "n": 500,
+          "p50_ms": 0.1263,
+          "p95_ms": 0.5313,
+          "p99_ms": 1.3342,
+          "mean_ms": 0.193717,
+          "ops_per_sec": 5162.169556621257
+        },
+        {
+          "name": "count_published",
+          "n": 50,
+          "p50_ms": 4.8828,
+          "p95_ms": 8.1191,
+          "p99_ms": 8.9046,
+          "mean_ms": 5.138148,
+          "ops_per_sec": 194.6226539212183
+        },
+        {
+          "name": "update_title",
+          "n": 500,
+          "p50_ms": 2.4257,
+          "p95_ms": 5.0101,
+          "p99_ms": 7.3869,
+          "mean_ms": 2.834618,
+          "ops_per_sec": 352.78122131447697
+        }
+      ],
+      "heap_alloc_bytes": 1024696,
+      "heap_sys_bytes": 117243904,
+      "sys_bytes": 126177280,
+      "total_alloc_bytes": 916472400,
+      "rss_bytes": 174993408,
+      "disk_bytes": 268435456,
+      "num_gc": 21,
+      "go_version": "go1.27.3",
+      "goos": "windows",
+      "goarch": "amd64",
+      "num_cpu": 8
+    },
+    {
+      "engine": "sqlite",
+      "records": 100000,
+      "open_ms": 14.9429,
+      "seed_ms": 14159.4832,
+      "seed_rows_per_sec": 7062.404650474814,
+      "workloads": [
+        {
+          "name": "point_get",
+          "n": 2000,
+          "p50_ms": 0.1333,
+          "p95_ms": 0.5272,
+          "p99_ms": 1.2532,
+          "mean_ms": 0.203539,
+          "ops_per_sec": 4913.063344125696
+        },
+        {
+          "name": "list_published",
+          "n": 500,
+          "p50_ms": 0.4037,
+          "p95_ms": 1.7558,
+          "p99_ms": 3.1957,
+          "mean_ms": 0.593569,
+          "ops_per_sec": 1684.7241011575738
+        },
+        {
+          "name": "count_published",
+          "n": 50,
+          "p50_ms": 12.4617,
+          "p95_ms": 19.8086,
+          "p99_ms": 27.6016,
+          "mean_ms": 12.62898,
+          "ops_per_sec": 79.18295856039046
+        },
+        {
+          "name": "update_title",
+          "n": 500,
+          "p50_ms": 0.1871,
+          "p95_ms": 1.0174,
+          "p99_ms": 2.9451,
+          "mean_ms": 0.33218,
+          "ops_per_sec": 3010.4160394966584
+        }
+      ],
+      "heap_alloc_bytes": 633976,
+      "heap_sys_bytes": 105447424,
+      "sys_bytes": 116338688,
+      "total_alloc_bytes": 194810440,
+      "rss_bytes": 126447616,
+      "disk_bytes": 61973664,
+      "num_gc": 7,
+      "go_version": "go1.27.3",
+      "goos": "windows",
+      "goarch": "amd64",
+      "num_cpu": 8
+    }
+  ],
+  "binary_sizes": [
+    {
+      "name": "bbolt-only",
+      "bytes": 3606528
+    },
+    {
+      "name": "sqlite-only",
+      "bytes": 9889280
+    }
+  ],
+  "cross_compile": [
+    {
+      "goos": "linux",
+      "goarch": "amd64",
+      "ok": true,
+      "duration_ms": 3440.8169,
+      "bytes": 12345119
+    },
+    {
+      "goos": "linux",
+      "goarch": "arm64",
+      "ok": true,
+      "duration_ms": 2404.8092,
+      "bytes": 11810790
+    },
+    {
+      "goos": "darwin",
+      "goarch": "arm64",
+      "ok": true,
+      "duration_ms": 1978.2771,
+      "bytes": 11756274
+    }
+  ]
+}

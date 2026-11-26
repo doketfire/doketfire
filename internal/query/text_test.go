@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/docpocket/docpocket/internal/collections"
-	"github.com/docpocket/docpocket/internal/storage"
+	"github.com/doketfire/doketfire/internal/collections"
+	"github.com/doketfire/doketfire/internal/storage"
 )
 
 func TestTextMatch(t *testing.T) {

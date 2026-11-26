@@ -3,7 +3,7 @@ package rules
 import (
 	"testing"
 
-	"github.com/docpocket/docpocket/internal/collections"
+	"github.com/doketfire/doketfire/internal/collections"
 )
 
 func benchRuleEngine(b *testing.B) *Engine {

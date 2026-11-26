@@ -19,13 +19,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/docpocket/docpocket/internal/auth"
-	"github.com/docpocket/docpocket/internal/collections"
-	"github.com/docpocket/docpocket/internal/files"
-	"github.com/docpocket/docpocket/internal/realtime"
-	"github.com/docpocket/docpocket/internal/rules"
-	"github.com/docpocket/docpocket/internal/storage"
-	"github.com/docpocket/docpocket/ui"
+	"github.com/doketfire/doketfire/internal/auth"
+	"github.com/doketfire/doketfire/internal/collections"
+	"github.com/doketfire/doketfire/internal/files"
+	"github.com/doketfire/doketfire/internal/realtime"
+	"github.com/doketfire/doketfire/internal/rules"
+	"github.com/doketfire/doketfire/internal/storage"
+	"github.com/doketfire/doketfire/ui"
 )
 
 type pipeListener struct {
@@ -137,7 +137,7 @@ func newTestAPIWithHooks(t *testing.T, hooks Hooks) *testAPI {
 		auth:     authSvc,
 		listener: listener,
 		client:   &http.Client{Timeout: 15 * time.Second, Transport: transport},
-		baseURL:  "http://docpocket.local",
+		baseURL:  "http://doketfire.local",
 	}
 	t.Cleanup(func() {
 		httpSrv.Close()
@@ -744,7 +744,7 @@ func TestFileUploadDownloadDelete(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := part.Write([]byte("hello docpocket")); err != nil {
+	if _, err := part.Write([]byte("hello doketfire")); err != nil {
 		t.Fatal(err)
 	}
 	if err := mw.WriteField("field", "attachment"); err != nil {
@@ -775,7 +775,7 @@ func TestFileUploadDownloadDelete(t *testing.T) {
 	download := api.request("GET", "/api/files/posts/"+id+"/"+name, nil, "", "")
 	body, _ := io.ReadAll(download.Body)
 	download.Body.Close()
-	if download.StatusCode != http.StatusOK || string(body) != "hello docpocket" {
+	if download.StatusCode != http.StatusOK || string(body) != "hello doketfire" {
 		t.Fatalf("download status %d body %q", download.StatusCode, body)
 	}
 	if !strings.Contains(download.Header.Get("Content-Type"), "text/plain") {
@@ -893,9 +893,9 @@ func TestMetricsAndVersion(t *testing.T) {
 	}
 	body, _ := io.ReadAll(resp.Body)
 	text := string(body)
-	if !strings.Contains(text, "docpocket_uptime_seconds") ||
-		!strings.Contains(text, "docpocket_db_size_bytes") ||
-		!strings.Contains(text, "docpocket_collections_total") {
+	if !strings.Contains(text, "doketfire_uptime_seconds") ||
+		!strings.Contains(text, "doketfire_db_size_bytes") ||
+		!strings.Contains(text, "doketfire_collections_total") {
 		t.Fatalf("unexpected metrics body:\n%s", text)
 	}
 
@@ -912,8 +912,8 @@ func TestMetricsAndVersion(t *testing.T) {
 		t.Fatalf("UI status %d", uiResp.StatusCode)
 	}
 	uiBody, _ := io.ReadAll(uiResp.Body)
-	if !strings.Contains(string(uiBody), "DocPocket") {
-		t.Fatalf("UI body does not contain DocPocket: %s", string(uiBody))
+	if !strings.Contains(string(uiBody), "Doketfire") {
+		t.Fatalf("UI body does not contain Doketfire: %s", string(uiBody))
 	}
 }
 

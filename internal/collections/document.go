@@ -30,7 +30,7 @@ const (
 	FieldTokenKey     = "tokenKey"
 )
 
-// TimeFormat is the canonical timestamp representation used by DocPocket.
+// TimeFormat is the canonical timestamp representation used by Doketfire.
 // Fixed-width UTC timestamps sort lexicographically in the same order as time.
 const TimeFormat = "2006-01-02T15:04:05.000Z"
 

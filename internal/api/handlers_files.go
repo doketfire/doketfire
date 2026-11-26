@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/docpocket/docpocket/internal/collections"
-	"github.com/docpocket/docpocket/internal/storage"
+	"github.com/doketfire/doketfire/internal/collections"
+	"github.com/doketfire/doketfire/internal/storage"
 )
 
 // handleUploadFile implements POST /api/collections/{col}/records/{id}/files.

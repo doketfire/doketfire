@@ -14,8 +14,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/docpocket/docpocket/internal/codec"
-	"github.com/docpocket/docpocket/internal/collections"
+	"github.com/doketfire/doketfire/internal/codec"
+	"github.com/doketfire/doketfire/internal/collections"
 	bolt "go.etcd.io/bbolt"
 )
 
@@ -65,7 +65,7 @@ func Open(dir string, opts Options) (*BoltStore, error) {
 		NoSync:   opts.NoSync,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("open database %s (is another DocPocket instance running?): %w", path, err)
+		return nil, fmt.Errorf("open database %s (is another Doketfire instance running?): %w", path, err)
 	}
 	s := &BoltStore{db: db, dir: dir, path: path, opts: opts, defCache: &defCache{items: make(map[string]*collections.CollectionDef)}}
 	if !opts.ReadOnly {

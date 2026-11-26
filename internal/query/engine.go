@@ -9,9 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/docpocket/docpocket/internal/codec"
-	"github.com/docpocket/docpocket/internal/collections"
-	"github.com/docpocket/docpocket/internal/storage"
+	"github.com/doketfire/doketfire/internal/codec"
+	"github.com/doketfire/doketfire/internal/collections"
+	"github.com/doketfire/doketfire/internal/storage"
 )
 
 var (

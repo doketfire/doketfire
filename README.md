@@ -1,11 +1,11 @@
-# DocPocket
+# Doketfire
 
 [![Go Version](https://img.shields.io/badge/go-1.26+-00ADD8.svg?style=flat-square&logo=go)](https://golang.org)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
 [![Embedded UI](https://img.shields.io/badge/ui-Svelte_5-FF3E00.svg?style=flat-square&logo=svelte)](ui)
 [![Database](https://img.shields.io/badge/storage-Bbolt-333333.svg?style=flat-square)](https://github.com/etcd-io/bbolt)
 
-**DocPocket** is an open-source, self-hosted Backend-as-a-Service (BaaS) packaged in a **single Go binary**. It provides a document database powered by embedded [Bbolt](https://github.com/etcd-io/bbolt), a full REST API, JWT authentication with session rotation, CEL access control, real-time Server-Sent Events (SSE), local file storage, and an embedded administrative dashboard.
+**Doketfire** is an open-source, self-hosted Backend-as-a-Service (BaaS) packaged in a **single Go binary**. It provides a document database powered by embedded [Bbolt](https://github.com/etcd-io/bbolt), a full REST API, JWT authentication with session rotation, CEL access control, real-time Server-Sent Events (SSE), local file storage, and an embedded administrative dashboard.
 
 **Zero external dependencies**: One binary, one database file, and one admin panel.
 
@@ -31,10 +31,10 @@
 
 ```bash
 # Build the binary
-go build -o docpocket ./cmd/docpocket
+go build -o doketfire ./cmd/doketfire
 
-# Start the server (defaults to ./dp_data on 0.0.0.0:8090)
-./docpocket serve --dir=./dp_data --http=127.0.0.1:8090
+# Start the server (defaults to ./data on 0.0.0.0:8090)
+./doketfire serve --dir=./data --http=127.0.0.1:8090
 ```
 
 ### 2. Create Initial Superuser
@@ -42,7 +42,7 @@ go build -o docpocket ./cmd/docpocket
 Open **`http://127.0.0.1:8090/_/`** in your browser to complete the initial setup, or create the first superuser directly via the CLI:
 
 ```bash
-./docpocket superuser create --dir=./dp_data admin@example.com "secure-password"
+./doketfire superuser create --dir=./data admin@example.com "secure-password"
 ```
 
 Once running:
@@ -61,7 +61,7 @@ curl -X POST http://127.0.0.1:8090/api/collections/posts/records \
   -H "Authorization: Bearer <TOKEN>" \
   -H "Content-Type: application/json" \
   -d '{
-    "title": "Getting Started with DocPocket",
+    "title": "Getting Started with Doketfire",
     "published": true,
     "tags": ["database", "go"]
   }'
@@ -125,14 +125,14 @@ Control record-level access using Google's [CEL (Common Expression Language)](ht
 
 ```text
 Usage:
-  docpocket serve [flags]                       Run the HTTP/HTTPS server
-  docpocket superuser create <email> <pwd>      Create a superuser account
-  docpocket backup [--dir=DIR] [--out=DIR]      Create a database snapshot backup
-  docpocket restore [--dir=DIR] <file>          Atomically restore database from backup
-  docpocket compact [--dir=DIR]                 Reclaim unused space and compact Bbolt file
-  docpocket check [--dir=DIR]                   Validate schema integrity and Bbolt pages
-  docpocket reindex [--dir=DIR] <col> [idx]     Rebuild collection index(es)
-  docpocket version                             Show version information
+  doketfire serve [flags]                       Run the HTTP/HTTPS server
+  doketfire superuser create <email> <pwd>      Create a superuser account
+  doketfire backup [--dir=DIR] [--out=DIR]      Create a database snapshot backup
+  doketfire restore [--dir=DIR] <file>          Atomically restore database from backup
+  doketfire compact [--dir=DIR]                 Reclaim unused space and compact Bbolt file
+  doketfire check [--dir=DIR]                   Validate schema integrity and Bbolt pages
+  doketfire reindex [--dir=DIR] <col> [idx]     Rebuild collection index(es)
+  doketfire version                             Show version information
 ```
 
 ---
@@ -143,17 +143,19 @@ Settings can be specified via command-line flags or environment variables:
 
 | Flag | Environment Variable | Default | Description |
 | --- | --- | --- | --- |
-| `--dir` | `DOCPOCKET_DIR` | `./dp_data` | Path to storage directory |
-| `--http` | `DOCPOCKET_HTTP` | `0.0.0.0:8090` | HTTP listen address |
-| `--https` | `DOCPOCKET_HTTPS_DOMAIN` | *(empty)* | Domain for automatic Let's Encrypt TLS |
-| `--tls-cert` | `DOCPOCKET_TLS_CERT` | *(empty)* | Custom TLS certificate file |
-| `--tls-key` | `DOCPOCKET_TLS_KEY` | *(empty)* | Custom TLS private key file |
-| `--cors` | `DOCPOCKET_CORS` | *(empty)* | Allowed CORS origins (comma-separated or `*`) |
-| `--read-only` | `DOCPOCKET_READ_ONLY` | `false` | Open database in read-only mode |
-| `--strict-indexes` | `DOCPOCKET_STRICT_INDEXES` | `false` | Reject queries that cannot use an index |
-| `--max-body` | `DOCPOCKET_MAX_BODY` | `2097152` | Maximum JSON request body (2 MiB) |
-| `--max-upload` | `DOCPOCKET_MAX_UPLOAD` | `26214400` | Maximum file upload size (25 MiB) |
-| `--log-level` | `DOCPOCKET_LOG_LEVEL` | `info` | Log verbosity (`debug`, `info`, `warn`, `error`) |
+| `--dir` | `DOKET_DIR` | `./data` | Path to storage directory |
+| `--http` | `DOKET_HTTP` | `0.0.0.0:8090` | HTTP listen address |
+| `--https` | `DOKET_HTTPS_DOMAIN` | *(empty)* | Domain for automatic Let's Encrypt TLS |
+| `--tls-cert` | `DOKET_TLS_CERT` | *(empty)* | Custom TLS certificate file |
+| `--tls-key` | `DOKET_TLS_KEY` | *(empty)* | Custom TLS private key file |
+| `--cors` | `DOKET_CORS` | *(empty)* | Allowed CORS origins (comma-separated or `*`) |
+| `--read-only` | `DOKET_READ_ONLY` | `false` | Open database in read-only mode |
+| `--strict-indexes` | `DOKET_STRICT_INDEXES` | `false` | Reject queries that cannot use an index |
+| `--max-body` | `DOKET_MAX_BODY` | `2097152` | Maximum JSON request body (2 MiB) |
+| `--max-upload` | `DOKET_MAX_UPLOAD` | `26214400` | Maximum file upload size (25 MiB) |
+| `--log-level` | `DOKET_LOG_LEVEL` | `info` | Log verbosity (`debug`, `info`, `warn`, `error`) |
+
+`DOKET_*` is the canonical prefix. `DOCPOCKET_*` is accepted as a legacy alias for one release.
 
 ---
 
@@ -163,22 +165,22 @@ Run with Docker using a persistent volume for the data directory:
 
 ```bash
 docker run -d \
-  --name docpocket \
+  --name doketfire \
   -p 8090:8090 \
-  -v docpocket_data:/data \
-  ghcr.io/docpocket/docpocket:latest
+  -v doketfire_data:/data \
+  ghcr.io/doketfire/doketfire:latest
 ```
 
 Create a superuser inside the container:
 
 ```bash
-docker exec -it docpocket docpocket superuser create --dir=/data admin@example.com "secure-password"
+docker exec -it doketfire doketfire superuser create --dir=/data admin@example.com "secure-password"
 ```
 
 Or build the image locally with the provided [Dockerfile](Dockerfile):
 
 ```bash
-docker build -t docpocket .
+docker build -t doketfire .
 ```
 
 ---
@@ -200,11 +202,11 @@ bun run build
 cd ..
 
 # Rebuild server with newly built UI assets
-go build -o docpocket ./cmd/docpocket
+go build -o doketfire ./cmd/doketfire
 ```
 
 ---
 
 ## License
 
-DocPocket is released under the [MIT License](LICENSE).
+Doketfire is released under the [MIT License](LICENSE).

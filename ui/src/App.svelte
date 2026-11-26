@@ -160,8 +160,8 @@
 <div class="app-shell">
   <header class="app-header">
     <div class="brand">
-      <span class="brand-mark" aria-hidden="true">DP</span>
-      <span class="brand-name">DocPocket</span>
+      <span class="brand-mark" aria-hidden="true">DK</span>
+      <span class="brand-name">Doketfire</span>
     </div>
     <div class="header-actions">
       {#if authenticated}
@@ -201,7 +201,7 @@
   {:else if booting}
     <main class="app-main">
       <div class="page card">
-        <StateBlock kind="loading" title="Conectando con DocPocket…" />
+        <StateBlock kind="loading" title="Conectando con Doketfire…" />
       </div>
     </main>
   {:else if !authenticated}
@@ -221,7 +221,7 @@
             <span>{section.label}</span>
           </button>
         {/each}
-        <div class="side-footer">DocPocket · un único binario</div>
+        <div class="side-footer">Doketfire · un único binario</div>
       </aside>
 
       <main class="app-main">

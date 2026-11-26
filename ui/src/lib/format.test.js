@@ -40,14 +40,14 @@ describe('formateadores', () => {
 describe('análisis de texto', () => {
   it('parsea métricas Prometheus simples e ignora comentarios', () => {
     const text = [
-      '# HELP docpocket_requests Total',
-      'docpocket_requests_total 12',
-      'docpocket_latency_seconds{quantile="0.5"} 0.25',
+      '# HELP doketfire_requests Total',
+      'doketfire_requests_total 12',
+      'doketfire_latency_seconds{quantile="0.5"} 0.25',
       'bad_line',
     ].join('\n')
     expect(parsePrometheus(text)).toEqual({
-      docpocket_requests_total: 12,
-      docpocket_latency_seconds: 0.25,
+      doketfire_requests_total: 12,
+      doketfire_latency_seconds: 0.25,
     })
   })
 

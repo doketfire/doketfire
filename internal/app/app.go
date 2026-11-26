@@ -16,14 +16,14 @@ import (
 
 	"golang.org/x/crypto/acme/autocert"
 
-	"github.com/docpocket/docpocket/internal/api"
-	"github.com/docpocket/docpocket/internal/auth"
-	"github.com/docpocket/docpocket/internal/files"
-	"github.com/docpocket/docpocket/internal/query"
-	"github.com/docpocket/docpocket/internal/realtime"
-	"github.com/docpocket/docpocket/internal/rules"
-	"github.com/docpocket/docpocket/internal/storage"
-	"github.com/docpocket/docpocket/ui"
+	"github.com/doketfire/doketfire/internal/api"
+	"github.com/doketfire/doketfire/internal/auth"
+	"github.com/doketfire/doketfire/internal/files"
+	"github.com/doketfire/doketfire/internal/query"
+	"github.com/doketfire/doketfire/internal/realtime"
+	"github.com/doketfire/doketfire/internal/rules"
+	"github.com/doketfire/doketfire/internal/storage"
+	"github.com/doketfire/doketfire/ui"
 )
 
 // App owns every service and the HTTP server.

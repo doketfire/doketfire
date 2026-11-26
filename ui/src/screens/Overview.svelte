@@ -44,7 +44,7 @@
 <div class="stack">
   <div class="page-head">
     <div class="page-title">
-      <h1>Bienvenido a DocPocket</h1>
+      <h1>Bienvenido a Doketfire</h1>
       <p class="page-subtitle">Tus datos organizados en colecciones. Empieza por crear una.</p>
     </div>
     <div class="page-actions">

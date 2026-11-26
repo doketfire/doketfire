@@ -74,7 +74,7 @@
         },
       });
       fromSettings(data);
-      document.title = `${data.title || 'DocPocket'} — Panel de administración`;
+      document.title = `${data.title || 'Doketfire'} — Panel de administración`;
       notify('Ajustes guardados.', 'success');
     } catch (err) {
       notify(errorMessage(err), 'error');

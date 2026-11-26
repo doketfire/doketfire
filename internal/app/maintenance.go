@@ -11,8 +11,8 @@ import (
 
 	bolt "go.etcd.io/bbolt"
 
-	"github.com/docpocket/docpocket/internal/api"
-	"github.com/docpocket/docpocket/internal/storage"
+	"github.com/doketfire/doketfire/internal/api"
+	"github.com/doketfire/doketfire/internal/storage"
 )
 
 // Compact rebuilds data.db from a consistent Bbolt snapshot. All HTTP requests
@@ -173,7 +173,7 @@ func validateBboltFile(path string) error {
 	defer db.Close()
 	return db.View(func(tx *bolt.Tx) error {
 		if tx.Bucket([]byte("_meta")) == nil || tx.Bucket([]byte("_collections")) == nil {
-			return errors.New("missing DocPocket system buckets")
+			return errors.New("missing Doketfire system buckets")
 		}
 		return nil
 	})

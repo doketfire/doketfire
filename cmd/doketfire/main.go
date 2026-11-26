@@ -1,4 +1,4 @@
-// Command docpocket runs the DocPocket server and its maintenance commands.
+// Command doketfire runs the Doketfire server and its maintenance commands.
 package main
 
 import (
@@ -16,9 +16,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/docpocket/docpocket/internal/app"
-	"github.com/docpocket/docpocket/internal/auth"
-	"github.com/docpocket/docpocket/internal/storage"
+	"github.com/doketfire/doketfire/internal/app"
+	"github.com/doketfire/doketfire/internal/auth"
+	"github.com/doketfire/doketfire/internal/storage"
 )
 
 // version is overridden at build time with -ldflags "-X main.version=...".
@@ -26,7 +26,7 @@ var version = "dev"
 
 func main() {
 	if err := run(os.Args[1:]); err != nil {
-		fmt.Fprintln(os.Stderr, "docpocket:", err)
+		fmt.Fprintln(os.Stderr, "doketfire:", err)
 		os.Exit(1)
 	}
 }
@@ -51,7 +51,7 @@ func run(args []string) error {
 	case "superuser":
 		return superuserCommand(args[1:])
 	case "version", "--version", "-v":
-		fmt.Println("docpocket " + version)
+		fmt.Println("doketfire " + version)
 		return nil
 	case "help", "--help", "-h":
 		usage()
@@ -63,22 +63,23 @@ func run(args []string) error {
 }
 
 func usage() {
-	fmt.Fprint(os.Stderr, `DocPocket - document database in a single binary
+	fmt.Fprint(os.Stderr, `Doketfire - document database in a single binary
 
 Usage:
-  docpocket serve [flags]
-  docpocket backup [--dir=DIR] [--out=DIR]
-  docpocket restore [--dir=DIR] <file>
-  docpocket compact [--dir=DIR]
-  docpocket check [--dir=DIR]
-  docpocket reindex [--dir=DIR] <collection> [index]
-  docpocket superuser create [--dir=DIR] <email> <password>
-  docpocket version
+  doketfire serve [flags]
+  doketfire backup [--dir=DIR] [--out=DIR]
+  doketfire restore [--dir=DIR] <file>
+  doketfire compact [--dir=DIR]
+  doketfire check [--dir=DIR]
+  doketfire reindex [--dir=DIR] <collection> [index]
+  doketfire superuser create [--dir=DIR] <email> <password>
+  doketfire version
 
 Flags may appear before or after positional arguments.
 
 Environment:
-  DOCPOCKET_DIR, DOCPOCKET_HTTP, DOCPOCKET_CORS, DOCPOCKET_LOG_LEVEL
+  DOKET_DIR, DOKET_HTTP, DOKET_CORS, DOKET_LOG_LEVEL
+  Legacy aliases: DOCPOCKET_DIR, DOCPOCKET_HTTP, DOCPOCKET_CORS, DOCPOCKET_LOG_LEVEL
 `)
 }
 
@@ -88,34 +89,35 @@ func serveCommand(args []string) error {
 	var cors string
 	fs := flag.NewFlagSet("serve", flag.ContinueOnError)
 	fs.SetOutput(os.Stderr)
-	fs.StringVar(&cfg.Dir, "dir", envOr("DOCPOCKET_DIR", cfg.Dir), "data directory")
-	fs.StringVar(&cfg.HTTPAddr, "http", envOr("DOCPOCKET_HTTP", cfg.HTTPAddr), "HTTP listen address")
-	fs.StringVar(&cfg.HTTPSDomain, "https", envOr("DOCPOCKET_HTTPS_DOMAIN", ""), "domain for automatic TLS (ACME)")
-	fs.StringVar(&cfg.HTTPSAddr, "https-addr", envOr("DOCPOCKET_HTTPS_ADDR", cfg.HTTPSAddr), "HTTPS listen address")
-	fs.StringVar(&cfg.TLSCert, "tls-cert", envOr("DOCPOCKET_TLS_CERT", ""), "TLS certificate file")
-	fs.StringVar(&cfg.TLSKey, "tls-key", envOr("DOCPOCKET_TLS_KEY", ""), "TLS private key file")
-	fs.StringVar(&cfg.AutocertDir, "autocert-dir", envOr("DOCPOCKET_AUTOCERT_DIR", ""), "ACME certificate cache")
-	fs.BoolVar(&cfg.ReadOnly, "read-only", envBool("DOCPOCKET_READ_ONLY", false), "open the database read-only")
-	fs.BoolVar(&cfg.NoSync, "no-sync", envBool("DOCPOCKET_NO_SYNC", false), "disable fsync (unsafe)")
-	fs.BoolVar(&cfg.StrictIndexes, "strict-indexes", envBool("DOCPOCKET_STRICT_INDEXES", false), "reject queries without an index")
-	fs.BoolVar(&cfg.TrustProxy, "trust-proxy", envBool("DOCPOCKET_TRUST_PROXY", false), "trust X-Forwarded-For")
-	fs.IntVar(&cfg.MaxDocSize, "max-doc-size", envInt("DOCPOCKET_MAX_DOC_SIZE", 0), "maximum document size in bytes (0 = 1 MiB)")
-	fs.Int64Var(&cfg.MaxBodyBytes, "max-body", envInt64("DOCPOCKET_MAX_BODY", cfg.MaxBodyBytes), "maximum JSON body size")
-	fs.Int64Var(&cfg.MaxUploadBytes, "max-upload", envInt64("DOCPOCKET_MAX_UPLOAD", cfg.MaxUploadBytes), "maximum upload size")
-	fs.StringVar(&cors, "cors", envOr("DOCPOCKET_CORS", ""), "comma-separated allowed origins")
+	fs.StringVar(&cfg.Dir, "dir", envOr("DOKET_DIR", cfg.Dir), "data directory")
+	fs.StringVar(&cfg.HTTPAddr, "http", envOr("DOKET_HTTP", cfg.HTTPAddr), "HTTP listen address")
+	fs.StringVar(&cfg.HTTPSDomain, "https", envOr("DOKET_HTTPS_DOMAIN", ""), "domain for automatic TLS (ACME)")
+	fs.StringVar(&cfg.HTTPSAddr, "https-addr", envOr("DOKET_HTTPS_ADDR", cfg.HTTPSAddr), "HTTPS listen address")
+	fs.StringVar(&cfg.TLSCert, "tls-cert", envOr("DOKET_TLS_CERT", ""), "TLS certificate file")
+	fs.StringVar(&cfg.TLSKey, "tls-key", envOr("DOKET_TLS_KEY", ""), "TLS private key file")
+	fs.StringVar(&cfg.AutocertDir, "autocert-dir", envOr("DOKET_AUTOCERT_DIR", ""), "ACME certificate cache")
+	fs.BoolVar(&cfg.ReadOnly, "read-only", envBool("DOKET_READ_ONLY", false), "open the database read-only")
+	fs.BoolVar(&cfg.NoSync, "no-sync", envBool("DOKET_NO_SYNC", false), "disable fsync (unsafe)")
+	fs.BoolVar(&cfg.StrictIndexes, "strict-indexes", envBool("DOKET_STRICT_INDEXES", false), "reject queries without an index")
+	fs.BoolVar(&cfg.TrustProxy, "trust-proxy", envBool("DOKET_TRUST_PROXY", false), "trust X-Forwarded-For")
+	fs.IntVar(&cfg.MaxDocSize, "max-doc-size", envInt("DOKET_MAX_DOC_SIZE", 0), "maximum document size in bytes (0 = 1 MiB)")
+	fs.Int64Var(&cfg.MaxBodyBytes, "max-body", envInt64("DOKET_MAX_BODY", cfg.MaxBodyBytes), "maximum JSON body size")
+	fs.Int64Var(&cfg.MaxUploadBytes, "max-upload", envInt64("DOKET_MAX_UPLOAD", cfg.MaxUploadBytes), "maximum upload size")
+	fs.StringVar(&cors, "cors", envOr("DOKET_CORS", ""), "comma-separated allowed origins")
 	fs.DurationVar(&cfg.AccessTTL, "access-ttl", cfg.AccessTTL, "access token lifetime")
 	fs.DurationVar(&cfg.RefreshTTL, "refresh-ttl", cfg.RefreshTTL, "refresh token lifetime")
 	fs.IntVar(&cfg.QueryLimits.DefaultLimit, "default-limit", cfg.QueryLimits.DefaultLimit, "default page size")
 	fs.IntVar(&cfg.QueryLimits.MaxLimit, "max-limit", cfg.QueryLimits.MaxLimit, "maximum page size")
 	fs.IntVar(&cfg.QueryLimits.MaxSortDocs, "max-sort-docs", cfg.QueryLimits.MaxSortDocs, "maximum documents sorted in memory")
 	fs.DurationVar(&cfg.QueryLimits.Timeout, "query-timeout", cfg.QueryLimits.Timeout, "maximum query duration")
-	fs.StringVar(&cfg.LogLevel, "log-level", envOr("DOCPOCKET_LOG_LEVEL", cfg.LogLevel), "debug, info, warn or error")
+	fs.StringVar(&cfg.LogLevel, "log-level", envOr("DOKET_LOG_LEVEL", cfg.LogLevel), "debug, info, warn or error")
 	if err := fs.Parse(args); err != nil {
 		if errors.Is(err, flag.ErrHelp) {
 			return nil
 		}
 		return err
 	}
+	resolveDataDir(&cfg, fs)
 	cfg.CORSOrigins = splitCSV(cors)
 	a, err := app.New(cfg)
 	if err != nil {
@@ -129,11 +131,11 @@ func serveCommand(args []string) error {
 	if cfg.HTTPSDomain != "" {
 		addr = cfg.HTTPSAddr
 	}
-	a.Logger.Info("docpocket starting", "addr", addr, "dir", cfg.Dir, "version", cfg.Version)
+	a.Logger.Info("doketfire starting", "addr", addr, "dir", cfg.Dir, "version", cfg.Version)
 	if err := a.Run(ctx); err != nil {
 		return err
 	}
-	a.Logger.Info("docpocket stopped")
+	a.Logger.Info("doketfire stopped")
 	return nil
 }
 
@@ -142,11 +144,12 @@ func backupCommand(args []string) error {
 	out := ""
 	fs := flag.NewFlagSet("backup", flag.ContinueOnError)
 	fs.SetOutput(os.Stderr)
-	fs.StringVar(&cfg.Dir, "dir", envOr("DOCPOCKET_DIR", cfg.Dir), "data directory")
+	fs.StringVar(&cfg.Dir, "dir", envOr("DOKET_DIR", cfg.Dir), "data directory")
 	fs.StringVar(&out, "out", "", "output directory (default: DIR/backups)")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
+	resolveDataDir(&cfg, fs)
 	if out == "" {
 		out = filepath.Join(cfg.Dir, "backups")
 	}
@@ -158,7 +161,7 @@ func backupCommand(args []string) error {
 	if err := os.MkdirAll(out, 0o700); err != nil {
 		return err
 	}
-	name := "docpocket-" + time.Now().UTC().Format("20060102-150405") + ".db"
+	name := "doketfire-" + time.Now().UTC().Format("20060102-150405") + ".db"
 	path := filepath.Join(out, name)
 	f, err := os.OpenFile(path, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0o600)
 	if err != nil {
@@ -185,13 +188,14 @@ func restoreCommand(args []string) error {
 	cfg := app.DefaultConfig()
 	fs := flag.NewFlagSet("restore", flag.ContinueOnError)
 	fs.SetOutput(os.Stderr)
-	fs.StringVar(&cfg.Dir, "dir", envOr("DOCPOCKET_DIR", cfg.Dir), "data directory")
+	fs.StringVar(&cfg.Dir, "dir", envOr("DOKET_DIR", cfg.Dir), "data directory")
 	positional, err := parseFlags(fs, args)
 	if err != nil {
 		return err
 	}
+	resolveDataDir(&cfg, fs)
 	if len(positional) != 1 {
-		return errors.New("usage: docpocket restore [--dir=DIR] <file>")
+		return errors.New("usage: doketfire restore [--dir=DIR] <file>")
 	}
 	src := positional[0]
 	st, err := os.Stat(src)
@@ -216,10 +220,11 @@ func compactCommand(args []string) error {
 	cfg := app.DefaultConfig()
 	fs := flag.NewFlagSet("compact", flag.ContinueOnError)
 	fs.SetOutput(os.Stderr)
-	fs.StringVar(&cfg.Dir, "dir", envOr("DOCPOCKET_DIR", cfg.Dir), "data directory")
+	fs.StringVar(&cfg.Dir, "dir", envOr("DOKET_DIR", cfg.Dir), "data directory")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
+	resolveDataDir(&cfg, fs)
 	store, err := storage.Open(cfg.Dir, storage.Options{})
 	if err != nil {
 		return err
@@ -266,10 +271,11 @@ func checkCommand(args []string) error {
 	cfg := app.DefaultConfig()
 	fs := flag.NewFlagSet("check", flag.ContinueOnError)
 	fs.SetOutput(os.Stderr)
-	fs.StringVar(&cfg.Dir, "dir", envOr("DOCPOCKET_DIR", cfg.Dir), "data directory")
+	fs.StringVar(&cfg.Dir, "dir", envOr("DOKET_DIR", cfg.Dir), "data directory")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
+	resolveDataDir(&cfg, fs)
 	store, err := storage.Open(cfg.Dir, storage.Options{ReadOnly: true})
 	if err != nil {
 		return err
@@ -291,13 +297,14 @@ func reindexCommand(args []string) error {
 	cfg := app.DefaultConfig()
 	fs := flag.NewFlagSet("reindex", flag.ContinueOnError)
 	fs.SetOutput(os.Stderr)
-	fs.StringVar(&cfg.Dir, "dir", envOr("DOCPOCKET_DIR", cfg.Dir), "data directory")
+	fs.StringVar(&cfg.Dir, "dir", envOr("DOKET_DIR", cfg.Dir), "data directory")
 	positional, err := parseFlags(fs, args)
 	if err != nil {
 		return err
 	}
+	resolveDataDir(&cfg, fs)
 	if len(positional) < 1 || len(positional) > 2 {
-		return errors.New("usage: docpocket reindex [--dir=DIR] <collection> [index]")
+		return errors.New("usage: doketfire reindex [--dir=DIR] <collection> [index]")
 	}
 	collection := positional[0]
 	index := ""
@@ -345,18 +352,19 @@ func reindexCommand(args []string) error {
 
 func superuserCommand(args []string) error {
 	if len(args) == 0 || args[0] != "create" {
-		return errors.New("usage: docpocket superuser create [--dir=DIR] <email> <password>")
+		return errors.New("usage: doketfire superuser create [--dir=DIR] <email> <password>")
 	}
 	cfg := app.DefaultConfig()
 	fs := flag.NewFlagSet("superuser create", flag.ContinueOnError)
 	fs.SetOutput(os.Stderr)
-	fs.StringVar(&cfg.Dir, "dir", envOr("DOCPOCKET_DIR", cfg.Dir), "data directory")
+	fs.StringVar(&cfg.Dir, "dir", envOr("DOKET_DIR", cfg.Dir), "data directory")
 	positional, err := parseFlags(fs, args[1:])
 	if err != nil {
 		return err
 	}
+	resolveDataDir(&cfg, fs)
 	if len(positional) != 2 {
-		return errors.New("usage: docpocket superuser create [--dir=DIR] <email> <password>")
+		return errors.New("usage: doketfire superuser create [--dir=DIR] <email> <password>")
 	}
 	store, err := storage.Open(cfg.Dir, storage.Options{})
 	if err != nil {
@@ -478,16 +486,67 @@ func copyFileAtomic(src, dst string) error {
 	return nil
 }
 
-func envOr(key, fallback string) string {
+// resolveDataDir keeps existing installations working after the default data
+// directory moved from ./dp_data to ./data. An explicit --dir flag or a
+// DOKET_DIR/DOCPOCKET_DIR variable always wins.
+func resolveDataDir(cfg *app.Config, fs *flag.FlagSet) {
+	if cfg.Dir != "./data" || flagWasSet(fs, "dir") || envSet("DOKET_DIR") || envSet("DOCPOCKET_DIR") {
+		return
+	}
+	if _, err := os.Stat("./data"); err == nil {
+		return
+	}
+	if st, err := os.Stat("./dp_data"); err == nil && st.IsDir() {
+		cfg.Dir = "./dp_data"
+	}
+}
+
+func flagWasSet(fs *flag.FlagSet, name string) bool {
+	set := false
+	fs.Visit(func(f *flag.Flag) {
+		if f.Name == name {
+			set = true
+		}
+	})
+	return set
+}
+
+func envSet(key string) bool {
+	v, ok := os.LookupEnv(key)
+	return ok && v != ""
+}
+
+// lookupEnv reads a DOKET_* variable and falls back to the legacy DOCPOCKET_*
+// name for one release.
+func lookupEnv(key string) (string, bool) {
 	if v, ok := os.LookupEnv(key); ok && v != "" {
+		return v, true
+	}
+	if legacy, ok := legacyEnvKey(key); ok {
+		if v, ok := os.LookupEnv(legacy); ok && v != "" {
+			return v, true
+		}
+	}
+	return "", false
+}
+
+func legacyEnvKey(key string) (string, bool) {
+	if strings.HasPrefix(key, "DOKET_") {
+		return "DOCPOCKET_" + strings.TrimPrefix(key, "DOKET_"), true
+	}
+	return "", false
+}
+
+func envOr(key, fallback string) string {
+	if v, ok := lookupEnv(key); ok {
 		return v
 	}
 	return fallback
 }
 
 func envBool(key string, fallback bool) bool {
-	v, ok := os.LookupEnv(key)
-	if !ok || v == "" {
+	v, ok := lookupEnv(key)
+	if !ok {
 		return fallback
 	}
 	b, err := strconv.ParseBool(v)
@@ -498,8 +557,8 @@ func envBool(key string, fallback bool) bool {
 }
 
 func envInt(key string, fallback int) int {
-	v, ok := os.LookupEnv(key)
-	if !ok || v == "" {
+	v, ok := lookupEnv(key)
+	if !ok {
 		return fallback
 	}
 	n, err := strconv.Atoi(v)
@@ -510,8 +569,8 @@ func envInt(key string, fallback int) int {
 }
 
 func envInt64(key string, fallback int64) int64 {
-	v, ok := os.LookupEnv(key)
-	if !ok || v == "" {
+	v, ok := lookupEnv(key)
+	if !ok {
 		return fallback
 	}
 	n, err := strconv.ParseInt(v, 10, 64)

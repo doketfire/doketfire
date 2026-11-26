@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/docpocket/docpocket/internal/collections"
+	"github.com/doketfire/doketfire/internal/collections"
 )
 
 func doc(id, owner string) collections.Document {

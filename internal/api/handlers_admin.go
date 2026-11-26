@@ -10,10 +10,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/docpocket/docpocket/internal/auth"
-	"github.com/docpocket/docpocket/internal/collections"
-	"github.com/docpocket/docpocket/internal/rules"
-	"github.com/docpocket/docpocket/internal/storage"
+	"github.com/doketfire/doketfire/internal/auth"
+	"github.com/doketfire/doketfire/internal/collections"
+	"github.com/doketfire/doketfire/internal/rules"
+	"github.com/doketfire/doketfire/internal/storage"
 )
 
 // ---- setup ----
@@ -457,7 +457,7 @@ func (s *Server) handleAdminBackup(w http.ResponseWriter, r *http.Request) {
 	if s.requireAdmin(w, r) == nil {
 		return
 	}
-	tmp, err := os.CreateTemp("", "docpocket-backup-*.db")
+	tmp, err := os.CreateTemp("", "doketfire-backup-*.db")
 	if err != nil {
 		s.writeServiceError(w, r, err)
 		return
@@ -481,7 +481,7 @@ func (s *Server) handleAdminBackup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/octet-stream")
-	w.Header().Set("Content-Disposition", `attachment; filename="docpocket-`+time.Now().UTC().Format("20060102-150405")+`.db"`)
+	w.Header().Set("Content-Disposition", `attachment; filename="doketfire-`+time.Now().UTC().Format("20060102-150405")+`.db"`)
 	w.Header().Set("Cache-Control", "no-store")
 	http.ServeContent(w, r, "backup.db", st.ModTime(), tmp)
 }

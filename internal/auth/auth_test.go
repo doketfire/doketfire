@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/docpocket/docpocket/internal/collections"
-	"github.com/docpocket/docpocket/internal/storage"
+	"github.com/doketfire/doketfire/internal/collections"
+	"github.com/doketfire/doketfire/internal/storage"
 )
 
 func testParams() Argon2Params {

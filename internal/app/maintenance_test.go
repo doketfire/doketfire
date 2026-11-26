@@ -12,7 +12,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/docpocket/docpocket/internal/storage"
+	"github.com/doketfire/doketfire/internal/storage"
 )
 
 func appJSON(t *testing.T, a *App, method, path, body, token string, want int) map[string]any {

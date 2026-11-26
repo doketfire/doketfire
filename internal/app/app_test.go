@@ -5,13 +5,13 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/docpocket/docpocket/internal/auth"
-	"github.com/docpocket/docpocket/internal/collections"
+	"github.com/doketfire/doketfire/internal/auth"
+	"github.com/doketfire/doketfire/internal/collections"
 )
 
 func TestDefaultConfig(t *testing.T) {
 	cfg := DefaultConfig()
-	if cfg.Dir != "./dp_data" {
+	if cfg.Dir != "./data" {
 		t.Fatalf("unexpected dir: %s", cfg.Dir)
 	}
 	if cfg.HTTPAddr != "0.0.0.0:8090" {

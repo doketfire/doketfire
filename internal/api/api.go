@@ -18,13 +18,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/docpocket/docpocket/internal/auth"
-	"github.com/docpocket/docpocket/internal/collections"
-	"github.com/docpocket/docpocket/internal/files"
-	"github.com/docpocket/docpocket/internal/query"
-	"github.com/docpocket/docpocket/internal/realtime"
-	"github.com/docpocket/docpocket/internal/rules"
-	"github.com/docpocket/docpocket/internal/storage"
+	"github.com/doketfire/doketfire/internal/auth"
+	"github.com/doketfire/doketfire/internal/collections"
+	"github.com/doketfire/doketfire/internal/files"
+	"github.com/doketfire/doketfire/internal/query"
+	"github.com/doketfire/doketfire/internal/realtime"
+	"github.com/doketfire/doketfire/internal/rules"
+	"github.com/doketfire/doketfire/internal/storage"
 )
 
 // Config controls API behavior.
@@ -92,7 +92,7 @@ type Deps struct {
 	Maintenance Maintenance
 }
 
-// Server is the DocPocket HTTP API.
+// Server is the Doketfire HTTP API.
 type Server struct {
 	store       storage.Storage
 	auth        *auth.Service

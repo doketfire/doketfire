@@ -24,7 +24,7 @@ func TestIncludeJoin(t *testing.T) {
 	}
 
 	project := api.json("POST", "/api/collections/project/records", map[string]any{
-		"title": "DocPocket Blog",
+		"title": "Doketfire Blog",
 	}, "", http.StatusCreated)
 	projectID, _ := project["id"].(string)
 	if projectID == "" {
@@ -45,8 +45,8 @@ func TestIncludeJoin(t *testing.T) {
 	if item["author.name"] != "Ana García" {
 		t.Fatalf("expected author.name = Ana García, got %v (item: %v)", item["author.name"], item)
 	}
-	if item["project.title"] != "DocPocket Blog" {
-		t.Fatalf("expected project.title = DocPocket Blog, got %v (item: %v)", item["project.title"], item)
+	if item["project.title"] != "Doketfire Blog" {
+		t.Fatalf("expected project.title = Doketfire Blog, got %v (item: %v)", item["project.title"], item)
 	}
 	if item["author"] != authorID {
 		t.Fatalf("expected author reference to remain %v, got %v", authorID, item["author"])

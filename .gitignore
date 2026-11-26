@@ -1,4 +1,7 @@
 # Binaries
+/doketfire
+/doketfire.exe
+# Legacy names kept so pre-rename artifacts stay ignored.
 /docpocket
 /docpocket.exe
 *.exe

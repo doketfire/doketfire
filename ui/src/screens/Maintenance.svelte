@@ -29,7 +29,7 @@
   async function runBackup() {
     busy = 'backup';
     try {
-      await downloadBlob('/api/admin/backup', 'docpocket-backup.db');
+      await downloadBlob('/api/admin/backup', 'doketfire-backup.db');
       notify('Copia de seguridad descargada.', 'success');
     } catch (err) {
       notify(errorMessage(err), 'error');

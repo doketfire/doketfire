@@ -1,4 +1,4 @@
-# Panel de administración de DocPocket
+# Panel de administración de Doketfire
 
 Aplicación Svelte 5 + Vite servida por el binario de Go bajo `/_/` y compilada dentro de `ui/build` (que `ui/embed.go` incrusta).
 

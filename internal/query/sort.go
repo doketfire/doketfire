@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/docpocket/docpocket/internal/codec"
-	"github.com/docpocket/docpocket/internal/collections"
+	"github.com/doketfire/doketfire/internal/codec"
+	"github.com/doketfire/doketfire/internal/collections"
 )
 
 const maxSortFields = 3

@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "docpocket-admin-ui",
+      "name": "doketfire-admin-ui",
       "dependencies": {
         "svelte": "^5.57.3",
       },

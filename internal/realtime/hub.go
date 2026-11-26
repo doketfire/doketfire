@@ -10,7 +10,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/docpocket/docpocket/internal/collections"
+	"github.com/doketfire/doketfire/internal/collections"
 )
 
 // Event is a committed document change.

@@ -1,4 +1,4 @@
-// Package auth implements DocPocket users, superusers, access tokens and
+// Package auth implements Doketfire users, superusers, access tokens and
 // refresh-token rotation.
 package auth
 
@@ -18,9 +18,9 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 
-	"github.com/docpocket/docpocket/internal/codec"
-	"github.com/docpocket/docpocket/internal/collections"
-	"github.com/docpocket/docpocket/internal/storage"
+	"github.com/doketfire/doketfire/internal/codec"
+	"github.com/doketfire/doketfire/internal/collections"
+	"github.com/doketfire/doketfire/internal/storage"
 )
 
 const (
@@ -61,7 +61,7 @@ func (c Config) withDefaults() Config {
 		c.RefreshTTL = 30 * 24 * time.Hour
 	}
 	if c.Issuer == "" {
-		c.Issuer = "docpocket"
+		c.Issuer = "doketfire"
 	}
 	c.Params = c.Params.withDefaults()
 	if c.Now == nil {
@@ -112,7 +112,7 @@ type Session struct {
 	Record       collections.Document `json:"record,omitempty"`
 }
 
-// Claims are the JWT claims used by DocPocket.
+// Claims are the JWT claims used by Doketfire.
 type Claims struct {
 	Kind       string `json:"kind"`
 	Collection string `json:"collection,omitempty"`
@@ -179,7 +179,7 @@ func New(store storage.Storage, cfg Config) (*Service, error) {
 	if err != nil {
 		return nil, err
 	}
-	dummy, err := HashPassword("docpocket-timing-equalizer", cfg.Params)
+	dummy, err := HashPassword("doketfire-timing-equalizer", cfg.Params)
 	if err != nil {
 		return nil, err
 	}
@@ -970,7 +970,7 @@ func (s *Service) signAccess(sub subject) (string, error) {
 
 func deriveAccessKey(secret []byte, kind, collection, tokenKey string) []byte {
 	mac := hmac.New(sha256.New, secret)
-	mac.Write([]byte("docpocket/access/v1\x00"))
+	mac.Write([]byte("doketfire/access/v1\x00"))
 	mac.Write([]byte(kind))
 	mac.Write([]byte{0})
 	mac.Write([]byte(collection))

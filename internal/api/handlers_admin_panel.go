@@ -12,8 +12,8 @@ import (
 
 	bolt "go.etcd.io/bbolt"
 
-	"github.com/docpocket/docpocket/internal/auth"
-	"github.com/docpocket/docpocket/internal/collections"
+	"github.com/doketfire/doketfire/internal/auth"
+	"github.com/doketfire/doketfire/internal/collections"
 )
 
 // ---- superusers ----
@@ -263,7 +263,7 @@ func (s *Server) handleAdminRestore(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusRequestEntityTooLarge, "file_too_large", "uploaded database is too large", nil)
 		return
 	}
-	tmp, err := os.CreateTemp("", "docpocket-restore-*.db")
+	tmp, err := os.CreateTemp("", "doketfire-restore-*.db")
 	if err != nil {
 		s.writeServiceError(w, r, err)
 		return
@@ -317,7 +317,7 @@ func validateBboltDatabase(path string) error {
 	defer db.Close()
 	return db.View(func(tx *bolt.Tx) error {
 		if tx.Bucket([]byte("_meta")) == nil || tx.Bucket([]byte("_collections")) == nil {
-			return errors.New("missing DocPocket system buckets")
+			return errors.New("missing Doketfire system buckets")
 		}
 		return nil
 	})

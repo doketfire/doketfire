@@ -1,12 +1,14 @@
 package main
 
 import (
+	"flag"
 	"os"
 	"path/filepath"
 	"testing"
 
-	"github.com/docpocket/docpocket/internal/collections"
-	"github.com/docpocket/docpocket/internal/storage"
+	"github.com/doketfire/doketfire/internal/app"
+	"github.com/doketfire/doketfire/internal/collections"
+	"github.com/doketfire/doketfire/internal/storage"
 )
 
 func TestRunVersionAndHelp(t *testing.T) {
@@ -208,5 +210,81 @@ func TestEnvHelpers(t *testing.T) {
 	}
 	if parts := splitCSV(""); len(parts) != 0 {
 		t.Fatalf("expected empty for empty string, got %v", parts)
+	}
+}
+
+func TestEnvLegacyAlias(t *testing.T) {
+	t.Setenv("DOKET_HTTP", "")
+	t.Setenv("DOCPOCKET_HTTP", "127.0.0.1:9999")
+	if got := envOr("DOKET_HTTP", "fallback"); got != "127.0.0.1:9999" {
+		t.Fatalf("legacy alias: got %q", got)
+	}
+
+	t.Setenv("DOKET_HTTP", "0.0.0.0:8090")
+	if got := envOr("DOKET_HTTP", "fallback"); got != "0.0.0.0:8090" {
+		t.Fatalf("new name must win: got %q", got)
+	}
+
+	t.Setenv("DOKET_READ_ONLY", "")
+	t.Setenv("DOCPOCKET_READ_ONLY", "true")
+	if !envBool("DOKET_READ_ONLY", false) {
+		t.Fatal("expected legacy boolean alias to be honored")
+	}
+}
+
+func TestResolveDataDir(t *testing.T) {
+	t.Setenv("DOKET_DIR", "")
+	t.Setenv("DOCPOCKET_DIR", "")
+	t.Chdir(t.TempDir())
+
+	newCfg := func() (app.Config, *flag.FlagSet) {
+		cfg := app.DefaultConfig()
+		fs := flag.NewFlagSet("test", flag.ContinueOnError)
+		fs.StringVar(&cfg.Dir, "dir", cfg.Dir, "")
+		return cfg, fs
+	}
+
+	cfg, fs := newCfg()
+	resolveDataDir(&cfg, fs)
+	if cfg.Dir != "./data" {
+		t.Fatalf("expected ./data when no legacy directory exists, got %s", cfg.Dir)
+	}
+
+	if err := os.Mkdir("dp_data", 0o700); err != nil {
+		t.Fatal(err)
+	}
+	cfg, fs = newCfg()
+	resolveDataDir(&cfg, fs)
+	if cfg.Dir != "./dp_data" {
+		t.Fatalf("expected legacy ./dp_data fallback, got %s", cfg.Dir)
+	}
+
+	if err := os.Mkdir("data", 0o700); err != nil {
+		t.Fatal(err)
+	}
+	cfg, fs = newCfg()
+	resolveDataDir(&cfg, fs)
+	if cfg.Dir != "./data" {
+		t.Fatalf("expected ./data to win when both exist, got %s", cfg.Dir)
+	}
+}
+
+func TestResolveDataDirExplicitFlagWins(t *testing.T) {
+	t.Setenv("DOKET_DIR", "")
+	t.Setenv("DOCPOCKET_DIR", "")
+	t.Chdir(t.TempDir())
+
+	if err := os.Mkdir("dp_data", 0o700); err != nil {
+		t.Fatal(err)
+	}
+	cfg := app.DefaultConfig()
+	fs := flag.NewFlagSet("test", flag.ContinueOnError)
+	fs.StringVar(&cfg.Dir, "dir", cfg.Dir, "")
+	if err := fs.Set("dir", "./data"); err != nil {
+		t.Fatal(err)
+	}
+	resolveDataDir(&cfg, fs)
+	if cfg.Dir != "./data" {
+		t.Fatalf("explicit --dir must win, got %s", cfg.Dir)
 	}
 }

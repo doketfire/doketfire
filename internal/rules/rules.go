@@ -10,7 +10,7 @@ import (
 
 	"cel.dev/cel-go/cel"
 
-	"github.com/docpocket/docpocket/internal/collections"
+	"github.com/doketfire/doketfire/internal/collections"
 )
 
 // RuleError describes an invalid rule expression.

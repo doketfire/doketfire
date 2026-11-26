@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/docpocket/docpocket/internal/storage"
+	"github.com/doketfire/doketfire/internal/storage"
 )
 
 func (a *testAPI) requestWithHeaders(method, path string, body []byte, token string, headers map[string]string) *http.Response {
@@ -77,7 +77,7 @@ func TestAdminSettingsValidationPersistenceAndDynamicCORS(t *testing.T) {
 	api.setupAdmin()
 
 	initial := api.json("GET", "/api/admin/settings", nil, api.token, http.StatusOK)
-	if initial["title"] != "DocPocket" {
+	if initial["title"] != "Doketfire" {
 		t.Fatalf("unexpected default title: %v", initial["title"])
 	}
 	if _, ok := initial["corsOrigins"].([]any); !ok {

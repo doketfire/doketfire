@@ -59,12 +59,12 @@
 <main class="auth-layout">
   <div class="auth-card">
     <div class="auth-head">
-      <div class="auth-logo" aria-hidden="true">DP</div>
+      <div class="auth-logo" aria-hidden="true">DK</div>
       <h1>{isSetup ? 'Configuración inicial' : 'Bienvenido de nuevo'}</h1>
       <p class="auth-subtitle">
         {isSetup
           ? 'Crea el primer superusuario de esta instancia.'
-          : 'Accede al panel de administración de DocPocket.'}
+          : 'Accede al panel de administración de Doketfire.'}
       </p>
     </div>
 

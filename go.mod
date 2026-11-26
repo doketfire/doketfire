@@ -1,4 +1,4 @@
-module github.com/docpocket/docpocket
+module github.com/doketfire/doketfire
 
 go 1.26.0
 

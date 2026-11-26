@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/docpocket/docpocket/internal/collections"
-	"github.com/docpocket/docpocket/internal/storage"
+	"github.com/doketfire/doketfire/internal/collections"
+	"github.com/doketfire/doketfire/internal/storage"
 )
 
 // Supported server-side aggregation operations.
@@ -35,7 +35,7 @@ type AggregateOptions struct {
 }
 
 // Aggregate computes a count or a sum over the documents that match the filter.
-// It replaces the client-side aggregation that DocPocket lacked at the product
+// It replaces the client-side aggregation that Doketfire lacked at the product
 // level while keeping the storage layer untouched.
 func (e *Engine) Aggregate(ctx context.Context, collection string, opts AggregateOptions) (float64, error) {
 	if e.Store == nil {

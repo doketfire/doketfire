@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/docpocket/docpocket/internal/storage"
+	"github.com/doketfire/doketfire/internal/storage"
 )
 
 func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
@@ -92,19 +92,19 @@ func (s *Server) handleMetrics(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "text/plain; version=0.0.4; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "# HELP docpocket_uptime_seconds Process uptime in seconds.\n")
-	fmt.Fprintf(w, "# TYPE docpocket_uptime_seconds counter\n")
-	fmt.Fprintf(w, "docpocket_uptime_seconds %d\n", uptime)
-	fmt.Fprintf(w, "# HELP docpocket_db_size_bytes Total size of the database file in bytes.\n")
-	fmt.Fprintf(w, "# TYPE docpocket_db_size_bytes gauge\n")
-	fmt.Fprintf(w, "docpocket_db_size_bytes %d\n", size)
-	fmt.Fprintf(w, "# HELP docpocket_collections_total Total number of collections.\n")
-	fmt.Fprintf(w, "# TYPE docpocket_collections_total gauge\n")
-	fmt.Fprintf(w, "docpocket_collections_total %d\n", cols)
-	fmt.Fprintf(w, "# HELP docpocket_realtime_clients Number of connected realtime SSE clients.\n")
-	fmt.Fprintf(w, "# TYPE docpocket_realtime_clients gauge\n")
-	fmt.Fprintf(w, "docpocket_realtime_clients %d\n", clients)
-	fmt.Fprintf(w, "# HELP docpocket_info Build and version metadata.\n")
-	fmt.Fprintf(w, "# TYPE docpocket_info gauge\n")
-	fmt.Fprintf(w, "docpocket_info{version=%q} 1\n", s.version)
+	fmt.Fprintf(w, "# HELP doketfire_uptime_seconds Process uptime in seconds.\n")
+	fmt.Fprintf(w, "# TYPE doketfire_uptime_seconds counter\n")
+	fmt.Fprintf(w, "doketfire_uptime_seconds %d\n", uptime)
+	fmt.Fprintf(w, "# HELP doketfire_db_size_bytes Total size of the database file in bytes.\n")
+	fmt.Fprintf(w, "# TYPE doketfire_db_size_bytes gauge\n")
+	fmt.Fprintf(w, "doketfire_db_size_bytes %d\n", size)
+	fmt.Fprintf(w, "# HELP doketfire_collections_total Total number of collections.\n")
+	fmt.Fprintf(w, "# TYPE doketfire_collections_total gauge\n")
+	fmt.Fprintf(w, "doketfire_collections_total %d\n", cols)
+	fmt.Fprintf(w, "# HELP doketfire_realtime_clients Number of connected realtime SSE clients.\n")
+	fmt.Fprintf(w, "# TYPE doketfire_realtime_clients gauge\n")
+	fmt.Fprintf(w, "doketfire_realtime_clients %d\n", clients)
+	fmt.Fprintf(w, "# HELP doketfire_info Build and version metadata.\n")
+	fmt.Fprintf(w, "# TYPE doketfire_info gauge\n")
+	fmt.Fprintf(w, "doketfire_info{version=%q} 1\n", s.version)
 }

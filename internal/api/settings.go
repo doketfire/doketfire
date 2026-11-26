@@ -10,14 +10,14 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/docpocket/docpocket/internal/storage"
+	"github.com/doketfire/doketfire/internal/storage"
 )
 
 const (
 	panelSettingsBucket = "_meta"
 	panelSettingsKey    = "panel_settings"
 
-	defaultTitle         = "DocPocket"
+	defaultTitle         = "Doketfire"
 	defaultAuthRateLimit = 10
 	defaultLogRetention  = 500
 	minAuthRateLimit     = 1

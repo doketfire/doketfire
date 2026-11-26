@@ -1,9 +1,9 @@
 {
-  "name": "docpocket-admin-ui",
+  "name": "doketfire-admin-ui",
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "Panel de administración de DocPocket (Svelte 5 + Vite)",
+  "description": "Panel de administración de Doketfire (Svelte 5 + Vite)",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

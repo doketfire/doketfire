@@ -1,4 +1,4 @@
-// Package query implements the DocPocket filter language: lexer, parser, AST,
+// Package query implements the Doketfire filter language: lexer, parser, AST,
 // evaluator and index-aware execution engine.
 package query
 

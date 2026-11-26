@@ -8,10 +8,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/docpocket/docpocket/internal/collections"
-	"github.com/docpocket/docpocket/internal/realtime"
-	"github.com/docpocket/docpocket/internal/rules"
-	"github.com/docpocket/docpocket/internal/storage"
+	"github.com/doketfire/doketfire/internal/collections"
+	"github.com/doketfire/doketfire/internal/realtime"
+	"github.com/doketfire/doketfire/internal/rules"
+	"github.com/doketfire/doketfire/internal/storage"
 )
 
 // handleRealtimeStream implements GET /api/realtime using Server-Sent Events.
