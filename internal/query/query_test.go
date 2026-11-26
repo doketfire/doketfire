@@ -195,7 +195,6 @@ func insertDoc(t *testing.T, store storage.Storage, d collections.Document) {
 
 func seedDocs(t *testing.T, store storage.Storage, n int) []collections.Document {
 	t.Helper()
-	docs := make([]collections.Document, 0, n)
 	for i := 0; i < n; i++ {
 		d := collections.Document{
 			"title":  fmt.Sprintf("post-%02d", i),
@@ -206,7 +205,6 @@ func seedDocs(t *testing.T, store storage.Storage, n int) []collections.Document
 			"rating": json.Number(fmt.Sprint((i * 7) % 13)),
 		}
 		insertDoc(t, store, d)
-		docs = append(docs, d)
 	}
 	// Fetch to obtain ids and timestamps.
 	var out []collections.Document

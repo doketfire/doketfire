@@ -2,6 +2,8 @@ module github.com/doketfire/doketfire
 
 go 1.26.0
 
+toolchain go1.27.4
+
 require (
 	cel.dev/cel-go v0.33.2
 	github.com/golang-jwt/jwt/v5 v5.3.1

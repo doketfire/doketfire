@@ -499,10 +499,6 @@ func newRequestID() string {
 	return hex.EncodeToString(b)
 }
 
-func (s *Server) collectionDef(tx storage.ReadTx, name string) (*collections.CollectionDef, error) {
-	return tx.Collection(name)
-}
-
 func sanitizeRecord(def *collections.CollectionDef, d collections.Document) collections.Document {
 	if d == nil {
 		return nil

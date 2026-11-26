@@ -46,46 +46,44 @@ func (it *boltIterator) Next() bool {
 		it.finished = true
 		return false
 	}
-	for {
-		var k, v []byte
-		if !it.started {
-			it.started = true
-			k, v = it.position()
-		} else if it.reverse {
-			k, v = it.cursor.Prev()
-		} else {
-			k, v = it.cursor.Next()
-		}
-		if k == nil {
-			it.finished = true
-			return false
-		}
-		if !it.inBounds(k) {
-			it.finished = true
-			return false
-		}
-		doc, err := it.load(k, v)
-		if err != nil {
-			it.err = err
-			it.finished = true
-			return false
-		}
-		it.yielded++
-		if it.opts.Limit > 0 && it.yielded > it.opts.Limit {
-			it.finished = true
-			return false
-		}
-		it.key = append(it.key[:0], k...)
-		it.doc = doc
-		return true
+	var k, v []byte
+	if !it.started {
+		it.started = true
+		k, v = it.position()
+	} else if it.reverse {
+		k, v = it.cursor.Prev()
+	} else {
+		k, v = it.cursor.Next()
 	}
+	if k == nil {
+		it.finished = true
+		return false
+	}
+	if !it.inBounds(k) {
+		it.finished = true
+		return false
+	}
+	doc, err := it.load(k, v)
+	if err != nil {
+		it.err = err
+		it.finished = true
+		return false
+	}
+	it.yielded++
+	if it.opts.Limit > 0 && it.yielded > it.opts.Limit {
+		it.finished = true
+		return false
+	}
+	it.key = append(it.key[:0], k...)
+	it.doc = doc
+	return true
 }
 
 func (it *boltIterator) position() (k, v []byte) {
 	c := it.cursor
 	if it.reverse {
 		if len(it.opts.After) > 0 {
-			k, v = c.Seek(it.opts.After)
+			k, _ = c.Seek(it.opts.After)
 			if k == nil {
 				k, v = c.Last()
 			} else {

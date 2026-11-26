@@ -49,27 +49,6 @@ func createPosts(t *testing.T, s Storage) {
 	}
 }
 
-func newDoc(title string, views int, tags ...string) Doc {
-	d := Doc{
-		"id":    collections.NewID(),
-		"title": title,
-		"views": json.Number(json.Number(string(rune('0' + views))).String()),
-		"tags":  toAny(tags),
-	}
-	if views > 9 {
-		d["views"] = json.Number(itoa(views))
-	}
-	return d
-}
-
-func toAny(ss []string) []any {
-	out := make([]any, len(ss))
-	for i, s := range ss {
-		out[i] = s
-	}
-	return out
-}
-
 func itoa(n int) string {
 	if n == 0 {
 		return "0"

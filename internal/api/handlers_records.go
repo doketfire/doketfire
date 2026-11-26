@@ -867,9 +867,7 @@ func (s *Server) handleTransactions(w http.ResponseWriter, r *http.Request) {
 			if applyErr != nil {
 				return applyErr
 			}
-			for i := range batchResults {
-				results = append(results, batchResults[i])
-			}
+			results = append(results, batchResults...)
 			events = append(events, batchEvents...)
 		}
 		return nil
