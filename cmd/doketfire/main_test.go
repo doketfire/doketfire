@@ -269,6 +269,32 @@ func TestResolveDataDir(t *testing.T) {
 	}
 }
 
+func TestResolveDataDirEnvWins(t *testing.T) {
+	t.Chdir(t.TempDir())
+	if err := os.Mkdir("dp_data", 0o700); err != nil {
+		t.Fatal(err)
+	}
+
+	for _, env := range []string{"DOKET_DIR", "DOCPOCKET_DIR"} {
+		t.Run(env, func(t *testing.T) {
+			t.Setenv("DOKET_DIR", "")
+			t.Setenv("DOCPOCKET_DIR", "")
+			t.Setenv(env, "./custom")
+
+			cfg := app.DefaultConfig()
+			fs := flag.NewFlagSet("test", flag.ContinueOnError)
+			fs.StringVar(&cfg.Dir, "dir", cfg.Dir, "")
+			resolveDataDir(&cfg, fs)
+			if cfg.Dir != "./data" {
+				t.Fatalf("%s must disable the legacy fallback, got %s", env, cfg.Dir)
+			}
+			if got := envOr("DOKET_DIR", "./data"); got != "./custom" {
+				t.Fatalf("%s: envOr = %s", env, got)
+			}
+		})
+	}
+}
+
 func TestResolveDataDirExplicitFlagWins(t *testing.T) {
 	t.Setenv("DOKET_DIR", "")
 	t.Setenv("DOCPOCKET_DIR", "")
