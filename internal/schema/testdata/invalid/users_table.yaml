@@ -1,0 +1,7 @@
+version: 1
+tables:
+  users:
+    fields:
+      email:
+        type: text
+        required: true

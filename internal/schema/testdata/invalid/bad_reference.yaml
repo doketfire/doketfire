@@ -1,0 +1,7 @@
+version: 1
+tables:
+  posts:
+    fields:
+      author_id:
+        type: uuid
+        references: users

@@ -1,0 +1,7 @@
+version: 1
+tables:
+  posts:
+    fields:
+      status:
+        type: enum
+        enum: []

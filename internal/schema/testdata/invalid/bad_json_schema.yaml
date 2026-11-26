@@ -1,0 +1,7 @@
+version: 1
+tables:
+  posts:
+    fields:
+      metadata:
+        type: json
+        json_schema: "{"

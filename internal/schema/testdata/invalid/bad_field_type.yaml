@@ -1,0 +1,6 @@
+version: 1
+tables:
+  posts:
+    fields:
+      title:
+        type: varchar

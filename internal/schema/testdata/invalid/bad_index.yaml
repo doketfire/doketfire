@@ -1,0 +1,8 @@
+version: 1
+tables:
+  posts:
+    fields:
+      title:
+        type: text
+    indexes:
+      - fields: [missing]

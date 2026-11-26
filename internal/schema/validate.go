@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"encoding/json"
 	"fmt"
 	"regexp"
 	"slices"
@@ -62,12 +63,26 @@ func (s *Schema) Validate() error {
 		if slices.Contains(systemColumns, t.Name) {
 			return fmt.Errorf("reserved table name %q", t.Name)
 		}
+		if t.Name == "users" {
+			return fmt.Errorf("reserved table name %q: users is the _dk_users alias", t.Name)
+		}
 		if _, ok := seenTables[t.Name]; ok {
 			return fmt.Errorf("duplicate table %q", t.Name)
 		}
 		seenTables[t.Name] = struct{}{}
 		if err := t.validate(); err != nil {
 			return fmt.Errorf("table %q: %w", t.Name, err)
+		}
+	}
+
+	// SQLite index names are database-wide, not per table.
+	indexOwner := make(map[string]string)
+	for _, t := range s.Tables {
+		for _, idx := range t.Indexes {
+			if other, ok := indexOwner[idx.Name]; ok {
+				return fmt.Errorf("duplicate index %q in tables %q and %q", idx.Name, other, t.Name)
+			}
+			indexOwner[idx.Name] = t.Name
 		}
 	}
 
@@ -123,6 +138,14 @@ func (t *Table) validate() error {
 			return fmt.Errorf("field %q: enum values require type %q", f.Name, TypeEnum)
 		}
 
+		if f.Pattern != "" {
+			if _, err := regexp.Compile(f.Pattern); err != nil {
+				return fmt.Errorf("field %q: invalid pattern: %w", f.Name, err)
+			}
+		}
+		if f.JSONSchema != "" && !json.Valid([]byte(f.JSONSchema)) {
+			return fmt.Errorf("field %q: invalid json_schema", f.Name)
+		}
 		if f.Min != nil && f.Max != nil && *f.Min > *f.Max {
 			return fmt.Errorf("field %q: min cannot be greater than max", f.Name)
 		}
@@ -158,13 +181,16 @@ func (t *Table) validate() error {
 		}
 		seenIndexFields := make(map[string]struct{}, len(idx.Fields))
 		for _, idxField := range idx.Fields {
-			if _, ok := seenFields[idxField.Name]; !ok {
+			if _, ok := seenFields[idxField.Name]; !ok && !slices.Contains(systemColumns, idxField.Name) {
 				return fmt.Errorf("index %q: unknown field %q", idx.Name, idxField.Name)
 			}
 			if _, ok := seenIndexFields[idxField.Name]; ok {
 				return fmt.Errorf("index %q: duplicate field %q", idx.Name, idxField.Name)
 			}
 			seenIndexFields[idxField.Name] = struct{}{}
+		}
+		if err := validateIndexWhere(idx.Where); err != nil {
+			return fmt.Errorf("index %q: %w", idx.Name, err)
 		}
 	}
 
@@ -178,8 +204,14 @@ func (t *Table) validate() error {
 
 func (s *Schema) validateRef(t *Table, f *Field) error {
 	ref := f.Ref
+	if !ValidIdent(ref.Field) {
+		return fmt.Errorf("table %q field %q: invalid reference field %q", t.Name, f.Name, ref.Field)
+	}
 	if isSystemTable(ref.Table) {
 		return nil
+	}
+	if !ValidIdent(ref.Table) {
+		return fmt.Errorf("table %q field %q: invalid reference table %q", t.Name, f.Name, ref.Table)
 	}
 	target, ok := s.Table(ref.Table)
 	if !ok {
@@ -194,4 +226,21 @@ func (s *Schema) validateRef(t *Table, f *Field) error {
 	return nil
 }
 
-func isSystemTable(name string) bool { return strings.HasPrefix(name, "_dk_") }
+// isSystemTable reports whether name is a built-in table. "users" is the
+// documented YAML alias of _dk_users; both resolve to the same physical table.
+func isSystemTable(name string) bool {
+	return name == "users" || strings.HasPrefix(name, "_dk_")
+}
+
+func validateIndexWhere(where string) error {
+	if where == "" {
+		return nil
+	}
+	if strings.ContainsAny(where, ";\x00\r\n") ||
+		strings.Contains(where, "--") ||
+		strings.Contains(where, "/*") ||
+		strings.Contains(where, "*/") {
+		return fmt.Errorf("invalid where clause %q", where)
+	}
+	return nil
+}

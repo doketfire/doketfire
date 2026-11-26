@@ -1,0 +1,16 @@
+version: 1
+tables:
+  posts:
+    fields:
+      title:
+        type: text
+    indexes:
+      - name: shared_idx
+        fields: [title]
+  comments:
+    fields:
+      body:
+        type: text
+    indexes:
+      - name: shared_idx
+        fields: [body]

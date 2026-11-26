@@ -6,8 +6,8 @@ import (
 )
 
 func validSchema() *Schema {
-	users := &Table{
-		Name: "users",
+	profiles := &Table{
+		Name: "profiles",
 		Fields: []*Field{
 			{Name: "email", Type: TypeText, Required: true, Unique: true},
 			{Name: "name", Type: TypeText},
@@ -27,7 +27,7 @@ func validSchema() *Schema {
 		Permissions: map[Action]string{ActionList: "true", ActionRead: "true"},
 		Realtime:    true,
 	}
-	return &Schema{Version: 1, Project: "blog", Tables: []*Table{posts, users}}
+	return &Schema{Version: 1, Project: "blog", Tables: []*Table{posts, profiles}}
 }
 
 func floatPtr(v float64) *float64 { return &v }
@@ -106,6 +106,7 @@ func TestSchemaValidateErrors(t *testing.T) {
 		{"version", func(s *Schema) { s.Version = 2 }, "unsupported schema version"},
 		{"invalid table", func(s *Schema) { s.Tables[0].Name = "Posts" }, "invalid table name"},
 		{"reserved table", func(s *Schema) { s.Tables[0].Name = "version" }, "reserved table name"},
+		{"users alias", func(s *Schema) { s.Tables[0].Name = "users" }, "users is the _dk_users alias"},
 		{"duplicate table", func(s *Schema) { s.Tables = append(s.Tables, s.Tables[0]) }, "duplicate table"},
 		{"invalid field", func(s *Schema) { s.Tables[0].Fields[0].Name = "Title" }, "invalid field name"},
 		{"reserved field", func(s *Schema) { s.Tables[0].Fields[0].Name = "created_at" }, "reserved field name"},
@@ -118,6 +119,8 @@ func TestSchemaValidateErrors(t *testing.T) {
 			s.Tables[0].Fields[0].Max = floatPtr(1)
 		}, "min cannot be greater"},
 		{"negative text min", func(s *Schema) { s.Tables[0].Fields[0].Min = floatPtr(-1) }, "cannot be negative"},
+		{"invalid pattern", func(s *Schema) { s.Tables[0].Fields[0].Pattern = "[" }, "invalid pattern"},
+		{"invalid json schema", func(s *Schema) { s.Tables[0].Fields[0].JSONSchema = "{" }, "invalid json_schema"},
 		{"invalid index", func(s *Schema) { s.Tables[0].Indexes[0].Name = "Bad" }, "invalid index name"},
 		{"index no fields", func(s *Schema) { s.Tables[0].Indexes[0].Fields = nil }, "expected 1 to 5 fields"},
 		{"index too many", func(s *Schema) {
@@ -134,9 +137,18 @@ func TestSchemaValidateErrors(t *testing.T) {
 		{"duplicate index", func(s *Schema) {
 			s.Tables[0].Indexes = append(s.Tables[0].Indexes, s.Tables[0].Indexes[0])
 		}, "duplicate index"},
+		{"duplicate index across tables", func(s *Schema) {
+			s.Tables[1].Indexes = []Index{{
+				Name:   s.Tables[0].Indexes[0].Name,
+				Fields: []IndexField{{Name: "email"}},
+			}}
+		}, "duplicate index"},
 		{"invalid action", func(s *Schema) { s.Tables[0].Permissions["publish"] = "true" }, "invalid permission action"},
 		{"unknown ref table", func(s *Schema) { s.Tables[0].Fields[1].Ref.Table = "missing" }, "references unknown table"},
-		{"unknown ref field", func(s *Schema) { s.Tables[0].Fields[1].Ref.Field = "missing" }, "references unknown field"},
+		{"unknown ref field", func(s *Schema) {
+			s.Tables[0].Fields[1].Ref.Table = "posts"
+			s.Tables[0].Fields[1].Ref.Field = "missing"
+		}, "references unknown field"},
 		{"bad on delete", func(s *Schema) { s.Tables[0].Fields[1].Ref.OnDelete = "NO ACTION" }, "invalid on_delete"},
 	}
 
