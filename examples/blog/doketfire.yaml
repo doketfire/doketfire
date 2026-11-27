@@ -1,0 +1,66 @@
+version: 1
+project: blog
+
+tables:
+  posts:
+    fields:
+      title:
+        type: text
+        required: true
+        min: 1
+        max: 200
+      slug:
+        type: text
+        required: true
+        unique: true
+        pattern: "^[a-z0-9-]+$"
+      body:
+        type: text
+      published:
+        type: boolean
+        default: false
+      author_id:
+        type: uuid
+        references: users.id
+      status:
+        type: enum
+        enum: [draft, published]
+        default: draft
+    indexes:
+      - fields: [published, created_at]
+      - name: posts_slug_idx
+        fields: [slug]
+        unique: true
+      - fields: [author_id]
+        where: "published = 1"
+    permissions:
+      list: "resource.published == true || (request.auth != null && request.auth.role == 'admin')"
+      read: "resource.published == true || (request.auth != null && (request.auth.id == resource.author_id || request.auth.role == 'admin'))"
+      create: "request.auth != null"
+      update: "request.auth != null && (request.auth.id == resource.author_id || request.auth.role == 'admin')"
+      delete: "request.auth != null && request.auth.role == 'admin'"
+    realtime: true
+
+  comments:
+    fields:
+      post_id:
+        type: uuid
+        required: true
+        references: posts.id
+      author_id:
+        type: uuid
+        references: users.id
+      body:
+        type: text
+        required: true
+        min: 1
+        max: 2000
+    indexes:
+      - fields: [post_id, created_at]
+      - fields: [author_id]
+    permissions:
+      list: "true"
+      read: "true"
+      create: "request.auth != null"
+      update: "request.auth != null && request.auth.id == resource.author_id"
+      delete: "request.auth != null && (request.auth.id == resource.author_id || request.auth.role == 'admin')"

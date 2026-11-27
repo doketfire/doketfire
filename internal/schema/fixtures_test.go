@@ -72,6 +72,26 @@ func TestBlogFixture(t *testing.T) {
 	}
 }
 
+func TestBlogExampleSchema(t *testing.T) {
+	path := filepath.Join("..", "..", "examples", "blog", "doketfire.yaml")
+	s, err := LoadFile(path)
+	if err != nil {
+		t.Fatalf("LoadFile(%s) error: %v", path, err)
+	}
+	if got, want := tableNames(s), []string{"comments", "posts"}; !equalStrings(got, want) {
+		t.Fatalf("tables = %v, want %v", got, want)
+	}
+	if _, err := Build(s); err != nil {
+		t.Fatalf("Build() error: %v", err)
+	}
+	if _, err := OpenAPI(s); err != nil {
+		t.Fatalf("OpenAPI() error: %v", err)
+	}
+	if _, err := BuildPanelMeta(s); err != nil {
+		t.Fatalf("BuildPanelMeta() error: %v", err)
+	}
+}
+
 func TestFixturesInvalid(t *testing.T) {
 	want := map[string]string{
 		"unknown_key.yaml":                   "field server not found",
