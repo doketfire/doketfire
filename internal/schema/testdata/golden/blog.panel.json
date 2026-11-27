@@ -1,0 +1,322 @@
+{
+  "version": 1,
+  "project": "blog",
+  "navigation": [
+    {
+      "name": "comments",
+      "label": "Comments",
+      "path": "/collections/comments"
+    },
+    {
+      "name": "posts",
+      "label": "Posts",
+      "path": "/collections/posts",
+      "realtime": true
+    },
+    {
+      "name": "profiles",
+      "label": "Profiles",
+      "path": "/collections/profiles"
+    }
+  ],
+  "collections": [
+    {
+      "name": "comments",
+      "label": "Comments",
+      "columns": [
+        {
+          "name": "id",
+          "label": "ID",
+          "type": "uuid",
+          "system": true,
+          "sortable": true
+        },
+        {
+          "name": "post_id",
+          "label": "Post ID",
+          "type": "uuid",
+          "sortable": true
+        },
+        {
+          "name": "body",
+          "label": "Body",
+          "type": "text",
+          "sortable": true
+        },
+        {
+          "name": "author_id",
+          "label": "Author ID",
+          "type": "uuid",
+          "sortable": true
+        },
+        {
+          "name": "created_at",
+          "label": "Created At",
+          "type": "timestamp",
+          "system": true,
+          "sortable": true
+        },
+        {
+          "name": "updated_at",
+          "label": "Updated At",
+          "type": "timestamp",
+          "system": true,
+          "sortable": true
+        }
+      ],
+      "fields": [
+        {
+          "name": "post_id",
+          "label": "Post ID",
+          "type": "uuid",
+          "widget": "relation",
+          "required": true,
+          "relation": {
+            "table": "posts",
+            "field": "id",
+            "on_delete": "SET NULL"
+          }
+        },
+        {
+          "name": "body",
+          "label": "Body",
+          "type": "text",
+          "widget": "text",
+          "required": true
+        },
+        {
+          "name": "author_id",
+          "label": "Author ID",
+          "type": "uuid",
+          "widget": "relation",
+          "relation": {
+            "table": "_dk_users",
+            "field": "id",
+            "on_delete": "SET NULL"
+          }
+        }
+      ],
+      "permissions": [
+        {
+          "action": "list",
+          "expression": "true"
+        },
+        {
+          "action": "read",
+          "expression": "true"
+        },
+        {
+          "action": "create",
+          "expression": "request.auth != null"
+        }
+      ]
+    },
+    {
+      "name": "posts",
+      "label": "Posts",
+      "realtime": true,
+      "columns": [
+        {
+          "name": "id",
+          "label": "ID",
+          "type": "uuid",
+          "system": true,
+          "sortable": true
+        },
+        {
+          "name": "title",
+          "label": "Title",
+          "type": "text",
+          "sortable": true
+        },
+        {
+          "name": "slug",
+          "label": "Slug",
+          "type": "text",
+          "sortable": true
+        },
+        {
+          "name": "body",
+          "label": "Body",
+          "type": "text",
+          "sortable": true
+        },
+        {
+          "name": "published",
+          "label": "Published",
+          "type": "boolean",
+          "sortable": true
+        },
+        {
+          "name": "author_id",
+          "label": "Author ID",
+          "type": "uuid",
+          "sortable": true
+        },
+        {
+          "name": "status",
+          "label": "Status",
+          "type": "enum",
+          "sortable": true
+        },
+        {
+          "name": "metadata",
+          "label": "Metadata",
+          "type": "json",
+          "sortable": false
+        },
+        {
+          "name": "created_at",
+          "label": "Created At",
+          "type": "timestamp",
+          "system": true,
+          "sortable": true
+        },
+        {
+          "name": "updated_at",
+          "label": "Updated At",
+          "type": "timestamp",
+          "system": true,
+          "sortable": true
+        }
+      ],
+      "fields": [
+        {
+          "name": "title",
+          "label": "Title",
+          "type": "text",
+          "widget": "text",
+          "required": true,
+          "min": 1,
+          "max": 200
+        },
+        {
+          "name": "slug",
+          "label": "Slug",
+          "type": "text",
+          "widget": "text",
+          "required": true,
+          "unique": true,
+          "pattern": "^[a-z0-9-]+$"
+        },
+        {
+          "name": "body",
+          "label": "Body",
+          "type": "text",
+          "widget": "text"
+        },
+        {
+          "name": "published",
+          "label": "Published",
+          "type": "boolean",
+          "widget": "checkbox",
+          "default": false
+        },
+        {
+          "name": "author_id",
+          "label": "Author ID",
+          "type": "uuid",
+          "widget": "relation",
+          "relation": {
+            "table": "_dk_users",
+            "field": "id",
+            "on_delete": "SET NULL"
+          }
+        },
+        {
+          "name": "status",
+          "label": "Status",
+          "type": "enum",
+          "widget": "select",
+          "options": [
+            "draft",
+            "published"
+          ]
+        },
+        {
+          "name": "metadata",
+          "label": "Metadata",
+          "type": "json",
+          "widget": "json"
+        }
+      ],
+      "permissions": [
+        {
+          "action": "list",
+          "expression": "resource.published == true"
+        },
+        {
+          "action": "read",
+          "expression": "resource.published == true"
+        },
+        {
+          "action": "create",
+          "expression": "request.auth != null"
+        },
+        {
+          "action": "update",
+          "expression": "request.auth != null && request.auth.id == resource.author_id"
+        },
+        {
+          "action": "delete",
+          "expression": "request.auth != null && request.auth.role == 'admin'"
+        }
+      ]
+    },
+    {
+      "name": "profiles",
+      "label": "Profiles",
+      "columns": [
+        {
+          "name": "id",
+          "label": "ID",
+          "type": "uuid",
+          "system": true,
+          "sortable": true
+        },
+        {
+          "name": "email",
+          "label": "Email",
+          "type": "text",
+          "sortable": true
+        },
+        {
+          "name": "name",
+          "label": "Name",
+          "type": "text",
+          "sortable": true
+        },
+        {
+          "name": "created_at",
+          "label": "Created At",
+          "type": "timestamp",
+          "system": true,
+          "sortable": true
+        },
+        {
+          "name": "updated_at",
+          "label": "Updated At",
+          "type": "timestamp",
+          "system": true,
+          "sortable": true
+        }
+      ],
+      "fields": [
+        {
+          "name": "email",
+          "label": "Email",
+          "type": "text",
+          "widget": "text",
+          "required": true,
+          "unique": true
+        },
+        {
+          "name": "name",
+          "label": "Name",
+          "type": "text",
+          "widget": "text"
+        }
+      ]
+    }
+  ]
+}
